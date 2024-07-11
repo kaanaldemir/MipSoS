@@ -206,6 +206,7 @@ applications that come with the platform
         <permission name="android.permission.UPDATE_APP_OPS_STATS"/>
         <permission name="android.permission.UPDATE_DEVICE_STATS"/>
         <permission name="android.permission.UPDATE_LOCK"/>
+        <permission name="android.permission.READ_APN_SETTINGS" />
         <permission name="android.permission.WRITE_APN_SETTINGS"/>
         <permission name="android.permission.WRITE_SECURE_SETTINGS"/>
         <permission name="android.permission.WRITE_EMBEDDED_SUBSCRIPTIONS"/>

@@ -5,26 +5,15 @@
     android:layout_height="match_parent"
     android:background="@drawable/gradient_background">
 
-    <ImageView
-        android:id="@+id/apnSettingsIcon"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="32dp"
-        app:srcCompat="@android:drawable/ic_menu_preferences" />
-
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/cardView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/apnSettingsIcon"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="32dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="16dp"
+        android:layout_centerInParent="true"
+        android:layout_margin="16dp"
         app:cardCornerRadius="16dp"
         app:cardElevation="8dp"
-        android:background="@drawable/gradient_background_card">
+        app:cardBackgroundColor="@color/background_color">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -47,25 +36,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="24dp" />
 
-            <TextView
-                android:id="@+id/signalStrengthTextView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Signal Strength: "
-                android:textColor="@color/primary_text_color"
-                android:textSize="18sp" />
-
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="16dp" />
-
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/apnsRecyclerView"
+                android:id="@+id/recyclerView"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1" />
+                android:layout_height="wrap_content" />
 
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
-</RelativeLayout>
 
+</RelativeLayout>
