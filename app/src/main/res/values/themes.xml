@@ -1,0 +1,14 @@
+<resources>
+
+    <style name="Theme.MipSoS" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <item name="colorPrimary">@color/primary_color</item>           <item name="colorOnPrimary">@color/primary_text_color</item>           <item name="colorPrimaryVariant">@color/secondary_color</item>           <item name="colorSecondary">@color/secondary_color</item>           <item name="colorOnSecondary">@color/primary_text_color</item>       </style>
+
+    <style name="Theme.MipSoS.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="Theme.MipSoS.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+    <style name="Theme.MipSoS.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+</resources>
