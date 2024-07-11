@@ -1,4 +1,4 @@
-package com.example.mipsos
+package com.mipo.mipsos
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4

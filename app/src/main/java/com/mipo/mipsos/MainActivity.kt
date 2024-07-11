@@ -1,4 +1,4 @@
-package com.example.mipsos
+package com.mipo.mipsos
 
 
 import android.Manifest

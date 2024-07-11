@@ -2,9 +2,9 @@
 :: Setup emulator https://stackoverflow.com/a/64397712/13361987
 
 :: CHANGE THESE
-set app_package=com.example.mipsos
+set app_package=com.mipo.mipsos
 set dir_app_name=MipSoS
-set MAIN_ACTIVITY=com.example.mipsos.MainActivity
+set MAIN_ACTIVITY=com.mipo.mipsos.MainActivity
 
 set ADB="adb"
 
@@ -14,7 +14,7 @@ set apk_host=app\build\outputs\apk\debug\app-debug.apk
 set apk_name=%dir_app_name%.apk
 
 :: Adjust the path to match your privapp-permissions-platform.xml location
-set privapp_permissions_xml_host=app\src\main\java\com\example\mipsos\privapp-permissions-platform.xml
+set privapp_permissions_xml_host=app\src\main\java\com\mipo\mipsos\privapp-permissions-platform.xml
 set privapp_permissions_xml_name=privapp-permissions-platform.xml
 
 :: Delete previous APK if it exists

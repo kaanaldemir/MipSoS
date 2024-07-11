@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.mipsos"
+    namespace = "com.mipo.mipsos"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.mipsos"
+        applicationId = "com.mipo.mipsos"
         minSdk = 29
         targetSdk = 34
         versionCode = 1
