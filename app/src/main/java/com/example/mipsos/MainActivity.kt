@@ -55,7 +55,7 @@ class MainActivity : AppCompatActivity() {
             getLocation { location ->
                 val latitude = location?.latitude ?: 0.0
                 val longitude = location?.longitude ?: 0.0
-                Log.d("LocationUpdate", "Latitude: $latitude, Longitude: $longitude")
+                Log.d("LocationUpdate", "Lat: $latitude Long: $longitude")
             }
             handler.postDelayed(this, 5 * 60 * 1000) // 5 minutes
         }
@@ -205,7 +205,7 @@ class MainActivity : AppCompatActivity() {
                 val latitude = location.latitude
                 val longitude = location.longitude
 
-                locationTextView.text = "Latitude: $latitude, Longitude: $longitude"
+                locationTextView.text = "Lat: $latitude Long: $longitude"
 
                 lastLocation = location
                 locationManager.removeUpdates(this)

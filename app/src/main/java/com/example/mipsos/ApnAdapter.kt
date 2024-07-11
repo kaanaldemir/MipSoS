@@ -17,6 +17,7 @@ class ApnAdapter(private val apnList: List<Apn>) : RecyclerView.Adapter<ApnAdapt
         val apn = apnList[position]
         holder.nameTextView.text = apn.name
         holder.apnTextView.text = apn.apn
+        holder.signalStrengthTextView.text = "Signal Strength: ${apn.signalStrength}"
     }
 
     override fun getItemCount(): Int = apnList.size
@@ -24,5 +25,6 @@ class ApnAdapter(private val apnList: List<Apn>) : RecyclerView.Adapter<ApnAdapt
     class ApnViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val nameTextView: TextView = itemView.findViewById(R.id.nameTextView)
         val apnTextView: TextView = itemView.findViewById(R.id.apnTextView)
+        val signalStrengthTextView: TextView = itemView.findViewById(R.id.signalStrengthTextView)
     }
 }
