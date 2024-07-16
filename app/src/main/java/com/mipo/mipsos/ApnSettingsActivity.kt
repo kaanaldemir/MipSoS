@@ -1,16 +1,12 @@
 package com.mipo.mipsos
 
 import android.content.Context
+import android.content.pm.PackageManager
 import android.database.Cursor
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Telephony
-import android.telephony.CellInfoCdma
-import android.telephony.CellInfoGsm
-import android.telephony.CellInfoLte
-import android.telephony.CellInfoNr
-import android.telephony.CellInfoWcdma
-import android.telephony.TelephonyManager
+import android.telephony.*
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -61,13 +57,14 @@ class ApnSettingsActivity : AppCompatActivity() {
         }
     }
 
-
     private fun getSignalStrength() {
         val telephonyManager = getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // Permission is not granted
+            Log.d("APNApp", "Permission not granted")
             return
         }
+
         val cellInfoList = telephonyManager.allCellInfo
         Log.d("APNApp", "Cell Info List Size: ${cellInfoList.size}")
 
@@ -78,8 +75,8 @@ class ApnSettingsActivity : AppCompatActivity() {
                 is CellInfoLte -> {
                     val cellSignalStrengthLte = cellInfo.cellSignalStrength
                     val networkName = cellInfo.cellIdentity.operatorAlphaLong?.toString() ?: "Unknown"
-                    val mcc = cellInfo.cellIdentity.mcc
-                    val mnc = cellInfo.cellIdentity.mnc
+                    val mcc = cellInfo.cellIdentity.mccString?.toIntOrNull()
+                    val mnc = cellInfo.cellIdentity.mncString?.toIntOrNull()
                     val providerKey = getProviderKey(mcc, mnc, networkName)
                     Log.d("APNApp", "LTE Signal Strength: ${cellSignalStrengthLte.dbm} for $providerKey")
                     Log.d("APNApp", "Cell Identity LTE: ${cellInfo.cellIdentity}")
@@ -88,8 +85,8 @@ class ApnSettingsActivity : AppCompatActivity() {
                 is CellInfoGsm -> {
                     val cellSignalStrengthGsm = cellInfo.cellSignalStrength
                     val networkName = cellInfo.cellIdentity.operatorAlphaLong?.toString() ?: "Unknown"
-                    val mcc = cellInfo.cellIdentity.mcc
-                    val mnc = cellInfo.cellIdentity.mnc
+                    val mcc = cellInfo.cellIdentity.mccString?.toIntOrNull()
+                    val mnc = cellInfo.cellIdentity.mncString?.toIntOrNull()
                     val providerKey = getProviderKey(mcc, mnc, networkName)
                     Log.d("APNApp", "GSM Signal Strength: ${cellSignalStrengthGsm.dbm} for $providerKey")
                     Log.d("APNApp", "Cell Identity GSM: ${cellInfo.cellIdentity}")
@@ -106,11 +103,11 @@ class ApnSettingsActivity : AppCompatActivity() {
                 is CellInfoWcdma -> {
                     val cellSignalStrengthWcdma = cellInfo.cellSignalStrength
                     val networkName = cellInfo.cellIdentity.operatorAlphaLong?.toString() ?: "Unknown"
-                    val mcc = cellInfo.cellIdentity.mcc
-                    val mnc = cellInfo.cellIdentity.mnc
+                    val mcc = cellInfo.cellIdentity.mccString?.toIntOrNull()
+                    val mnc = cellInfo.cellIdentity.mncString?.toIntOrNull()
                     val providerKey = getProviderKey(mcc, mnc, networkName)
                     Log.d("APNApp", "WCDMA Signal Strength: ${cellSignalStrengthWcdma.dbm} for $providerKey")
-                    Log.d("APNApp", "Cell Identity WCDMA: ${cellInfo.cellIdentity}")
+                    Log.d("APNApp", "Cell Identity WCDMA: ${cellInfo.cellIdentity} for $providerKey")
                     signalStrengthMap.getOrPut(providerKey) { mutableListOf() }.add(cellSignalStrengthWcdma.dbm)
                 }
                 is CellInfoNr -> {
@@ -124,6 +121,9 @@ class ApnSettingsActivity : AppCompatActivity() {
                     Log.d("APNApp", "Cell Identity NR: ${cellInfo.cellIdentity}")
                     signalStrengthMap.getOrPut(providerKey) { mutableListOf() }.add(cellSignalStrengthNr.dbm)
                 }
+                else -> {
+                    Log.d("APNApp", "Unknown cell info type: ${cellInfo.javaClass}")
+                }
             }
         }
 
@@ -136,7 +136,9 @@ class ApnSettingsActivity : AppCompatActivity() {
             } else {
                 apn.signalStrength = -120 // Default value for no signal
             }
-            Log.d("APNApp", "APN: ${apn.name} assigned signal strength: ${apn.signalStrength}")
+            if (apn.signalStrength != -120) {
+                Log.d("APNApp", "APN: ${apn.name} assigned signal strength: ${apn.signalStrength}")
+            }
         }
 
         apnList.sortByDescending { it.signalStrength }
@@ -159,5 +161,4 @@ class ApnSettingsActivity : AppCompatActivity() {
             else -> "Unknown"
         }
     }
-
 }
