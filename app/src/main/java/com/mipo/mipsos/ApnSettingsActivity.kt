@@ -6,16 +6,7 @@ import android.database.Cursor
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Telephony
-import android.telephony.NetworkScanRequest
-import android.telephony.TelephonyManager
-import android.telephony.TelephonyScanManager
-import android.telephony.CellInfo
-import android.telephony.CellInfoLte
-import android.telephony.CellInfoGsm
-import android.telephony.CellInfoCdma
-import android.telephony.CellInfoWcdma
-import android.telephony.CellInfoNr
-import android.telephony.CellIdentityNr
+import android.telephony.*
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -24,7 +15,6 @@ import androidx.recyclerview.widget.RecyclerView
 import android.os.Handler
 import android.os.Looper
 import java.util.concurrent.Executors
-import android.telephony.RadioAccessSpecifier
 
 class ApnSettingsActivity : AppCompatActivity() {
 
@@ -71,33 +61,47 @@ class ApnSettingsActivity : AppCompatActivity() {
     }
 
     private fun startNetworkScan() {
-        val telephonyManager = getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+        val telephonyManager = getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager?
+        if (telephonyManager == null) {
+            Log.e("APNApp", "TelephonyManager is null")
+            return
+        }
+
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // Permission is not granted
             Log.d("APNApp", "Permission not granted")
             return
         }
 
-        val radioAccessSpecifiers = arrayOf(
-            RadioAccessSpecifier(TelephonyManager.NETWORK_TYPE_GSM, null, null),
-            RadioAccessSpecifier(TelephonyManager.NETWORK_TYPE_UMTS, null, null),
-            RadioAccessSpecifier(TelephonyManager.NETWORK_TYPE_LTE, null, null)
+        val radioAccessSpecifier = arrayOf(
+            RadioAccessSpecifier(
+                AccessNetworkConstants.AccessNetworkType.GERAN,
+                intArrayOf(900, 1800), // Specify bands for GERAN (GSM)
+                null // channels (null means scan all)
+            ),
+            RadioAccessSpecifier(
+                AccessNetworkConstants.AccessNetworkType.UTRAN,
+                intArrayOf(2100), // Specify bands for UTRAN (UMTS)
+                null // channels
+            ),
+            RadioAccessSpecifier(
+                AccessNetworkConstants.AccessNetworkType.EUTRAN,
+                intArrayOf(1800, 2600), // Specify bands for EUTRAN (LTE)
+                null // channels
+            )
         )
 
-        val plmnIds = arrayListOf(
-            "28601", // Turkcell
-            "28602", // Vodafone Türkiye
-            "28603"  // Türk Telekom
-        )
+        // Add PLMN IDs for Turkey
+        val plmnIds = arrayListOf("28601", "28602", "28603") // Turkcell, Vodafone Türkiye, Türk Telekom
 
         val networkScanRequest = NetworkScanRequest(
             NetworkScanRequest.SCAN_TYPE_ONE_SHOT,
-            radioAccessSpecifiers,
-            1,
-            60,
-            false,
-            1,
-            plmnIds
+            radioAccessSpecifier,
+            5, // periodicity - not used for one-shot scans
+            60, // max search time in seconds
+            true, // incremental results
+            5, // incremental results periodicity in seconds
+            plmnIds // PLMN ids to search for
         )
 
         val networkScanCallback = object : TelephonyScanManager.NetworkScanCallback() {
@@ -175,13 +179,33 @@ class ApnSettingsActivity : AppCompatActivity() {
             override fun onError(error: Int) {
                 super.onError(error)
                 Log.d("APNApp", "Network Scan Error: $error")
+                if (error == 3) { // ERROR_MODEM_UNAVAILABLE
+                    retryNetworkScan()
+                }
             }
         }
 
         val executor = Executors.newSingleThreadExecutor()
-        telephonyManager.requestNetworkScan(networkScanRequest, executor, networkScanCallback)
+        try {
+            telephonyManager.requestNetworkScan(networkScanRequest, executor, networkScanCallback)
+        } catch (e: Exception) {
+            Log.e("APNApp", "Failed to start network scan", e)
+        }
     }
 
+    private var retryCount = 0
+    private val maxRetries = 3
+
+    private fun retryNetworkScan() {
+        if (retryCount < maxRetries) {
+            retryCount++
+            Handler(Looper.getMainLooper()).postDelayed({
+                startNetworkScan()
+            }, 5000) // Retry after 5 seconds
+        } else {
+            Log.e("APNApp", "Max retry attempts reached")
+        }
+    }
     private fun getProviderKey(mcc: Int?, mnc: Int?, networkName: String): String {
         return when {
             mcc == 286 && mnc == 1 -> "Turkcell"
@@ -199,4 +223,5 @@ class ApnSettingsActivity : AppCompatActivity() {
             else -> "Unknown"
         }
     }
+
 }

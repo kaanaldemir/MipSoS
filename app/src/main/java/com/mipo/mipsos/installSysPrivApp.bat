@@ -28,12 +28,12 @@ if not exist %apk_host% (
 for /f "tokens=*" %%i in ('%ADB% shell getprop ro.product.model') do set device_model=%%i
 
 :: Define paths based on the device model
-if "%device_model%"=="SM-S711B" (
+if "%device_model%"=="SM-M315F" (
     :: Set paths for Samsung Galaxy M31
     set permissions_xml_host=app\src\main\java\com\mipo\mipsos\Samsung\privapp-permissions-platform.xml
     set permissions_xml_name=privapp-permissions-platform.xml
-    set apk_path=/data/adb/modules/%dir_app_name%/system/system_ext/priv-app/%dir_app_name%
-    set permissions_path=/data/adb/modules/%dir_app_name%/system/system_ext/etc/permissions
+    set apk_path=/data/adb/modules/%dir_app_name%/system/priv-app/%dir_app_name%
+    set permissions_path=/data/adb/modules/%dir_app_name%/system/etc/permissions
 ) else if "%device_model%"=="mipo_M59" (
     :: Set paths for mipo_M59 device
     set permissions_xml_host=app\src\main\java\com\mipo\mipsos\privapp-permissions-platform.xml
