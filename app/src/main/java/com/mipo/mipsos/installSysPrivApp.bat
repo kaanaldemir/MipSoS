@@ -81,7 +81,7 @@ echo name=%dir_app_name%
 echo version=1.0.8
 echo versionCode=1
 echo author=Kaan
-echo description=Installs the app as inside system/priv-app and includes permissions inside privapp-permissions-platform.xml
+echo description=Installs the app inside system/priv-app and includes permissions inside privapp-permissions-platform.xml
 ) > module.prop
 
 :: Push the module.prop file to the temporary directory on the device

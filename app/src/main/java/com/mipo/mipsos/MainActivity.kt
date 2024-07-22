@@ -1,6 +1,5 @@
 package com.mipo.mipsos
 
-
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.PendingIntent
@@ -65,6 +64,7 @@ class MainActivity : AppCompatActivity() {
         private const val REQUEST_RECORD_AUDIO_PERMISSION = 200
         private const val PICK_CONTACT_REQUEST = 1001
         private const val MESSAGE_PREF_KEY = "sos_message"
+        private const val REQUEST_SMS_PERMISSION = 1002
     }
 
     private val emergencyContacts = mutableListOf<String>()
@@ -192,6 +192,13 @@ class MainActivity : AppCompatActivity() {
                 startRecording()
             } else {
                 Toast.makeText(this, "Audio recording permission denied", Toast.LENGTH_SHORT).show()
+            }
+        } else if (requestCode == REQUEST_SMS_PERMISSION) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission granted
+            } else {
+                // Permission denied
+                Toast.makeText(this, "SMS permission denied", Toast.LENGTH_SHORT).show()
             }
         }
     }
