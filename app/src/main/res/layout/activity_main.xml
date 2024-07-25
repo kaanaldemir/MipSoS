@@ -51,7 +51,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:text="MipSoS"
+                android:text="@string/app_name"
                 android:textColor="@color/primary_text_color"
                 android:textSize="28sp"
                 android:textStyle="bold" />
@@ -64,7 +64,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:hint="Emergency Message">
+                android:hint="@string/emergency_message_hint">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/messageEditText"
@@ -92,7 +92,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     app:icon="@android:drawable/ic_btn_speak_now"
-                    android:text="Record Audio"
+                    android:text="@string/record_audio"
                     android:textSize="18sp"
                     android:textColor="@color/primary_text_color" />
 
@@ -101,7 +101,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
-                    android:text="Not Recording"
+                    android:text="@string/not_recording"
                     android:textColor="@color/secondary_text_color"
                     android:layout_gravity="center_vertical" />
 
@@ -117,7 +117,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:icon="@android:drawable/ic_media_play"
-                android:text="Play Recording"
+                android:text="@string/play_recording"
                 android:textSize="18sp"
                 android:textColor="@color/primary_text_color" />
 
@@ -129,7 +129,7 @@
                 android:id="@+id/locationTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Location: N/A"
+                android:text="@string/location_na"
                 android:textColor="@color/secondary_text_color" />
 
             <Space
@@ -142,7 +142,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:icon="@android:drawable/ic_menu_call"
-                android:text="Pick Emergency Contacts"
+                android:text="@string/pick_contacts"
                 android:textSize="18sp"
                 android:textColor="@color/primary_text_color" />
 
@@ -155,7 +155,7 @@
                 style="@style/Widget.Material3.Button.OutlinedButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Send SOS"
+                android:text="@string/send_sos"
                 android:textSize="18sp"
                 android:textColor="@color/secondary_color"
                 app:strokeColor="@color/secondary_color" />
@@ -169,7 +169,7 @@
                     android:id="@+id/sendStatusTextView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Message Status: Ready to Send"
+                    android:text="@string/message_status_ready"
                     android:textColor="@color/secondary_text_color"
                     android:layout_alignParentStart="true" />
 
@@ -179,7 +179,7 @@
                     android:layout_height="20dp"
                     android:layout_alignParentEnd="true"
                     android:checked="true"
-                    android:text="Auto Send"
+                    android:text="@string/auto_send"
                     android:textColor="@color/primary_text_color" />
             </RelativeLayout>
 
@@ -195,7 +195,7 @@
                 android:layout_below="@id/sendStatusTextView"
                 android:layout_marginTop="0dp"
                 app:icon="@android:drawable/ic_menu_manage"
-                android:text="APN Settings"
+                android:text="@string/apn_settings"
                 android:textSize="18sp"
                 android:textColor="@color/primary_text_color" />
 

@@ -18,14 +18,14 @@ class DialogHelper(private val context: Context) {
         onExit: () -> Unit
     ) {
         val builder = AlertDialog.Builder(context)
-        builder.setTitle("Permissions Disclaimer")
-            .setMessage("This app needs certain permissions to function properly. No permissions will be used to collect data or for any malicious purposes. Please grant the required permissions.")
+        builder.setTitle(context.getString(R.string.permissions_disclaimer_title))
+            .setMessage(context.getString(R.string.permissions_disclaimer_message))
             .setCancelable(false)
-            .setPositiveButton("Proceed") { dialog, _ ->
+            .setPositiveButton(context.getString(R.string.proceed)) { dialog, _ ->
                 dialog.dismiss()
                 onProceed()
             }
-            .setNegativeButton("Exit") { _, _ ->
+            .setNegativeButton(context.getString(R.string.exit)) { _, _ ->
                 onExit()
             }
         val alertDialog = builder.create()
@@ -42,20 +42,20 @@ class DialogHelper(private val context: Context) {
         val dialogView = (context as AppCompatActivity).layoutInflater.inflate(R.layout.dialog_permissions, null)
         val permissionsListView: ListView = dialogView.findViewById(R.id.permissionsListView)
         val dialogTitle: TextView = dialogView.findViewById(R.id.dialogTitle)
-        dialogTitle.text = "Permissions Required"
+        dialogTitle.text = context.getString(R.string.permissions_required_title)
 
         val friendlyPermissions = getPermissionFriendlyNames(deniedPermissions)
         val adapter = ArrayAdapter(context, android.R.layout.simple_list_item_1, friendlyPermissions)
         permissionsListView.adapter = adapter
 
         builder.setView(dialogView)
-            .setMessage("This app needs the following permissions to function properly. Please grant all permissions.")
+            .setMessage(context.getString(R.string.permissions_required_message))
             .setCancelable(false)
-            .setPositiveButton("Grant Permissions") { dialog, _ ->
+            .setPositiveButton(context.getString(R.string.grant_permissions)) { dialog, _ ->
                 dialog.dismiss()
                 onGrantPermissions()
             }
-            .setNegativeButton("Exit") { _, _ ->
+            .setNegativeButton(context.getString(R.string.exit)) { _, _ ->
                 onExit()
             }
         val alertDialog = builder.create()
@@ -72,22 +72,22 @@ class DialogHelper(private val context: Context) {
         val dialogView = (context as AppCompatActivity).layoutInflater.inflate(R.layout.dialog_permissions, null)
         val permissionsListView: ListView = dialogView.findViewById(R.id.permissionsListView)
         val dialogTitle: TextView = dialogView.findViewById(R.id.dialogTitle)
-        dialogTitle.text = "Permissions Required"
+        dialogTitle.text = context.getString(R.string.permissions_required_title)
 
         val friendlyPermissions = getPermissionFriendlyNames(deniedPermissions.toSet())
         val adapter = ArrayAdapter(context, android.R.layout.simple_list_item_1, friendlyPermissions)
         permissionsListView.adapter = adapter
 
         builder.setView(dialogView)
-            .setMessage("Some permissions were permanently denied. Please go to app settings to grant all required permissions.")
+            .setMessage(context.getString(R.string.app_settings_message))
             .setCancelable(false)
-            .setPositiveButton("Open Settings") { dialog, _ ->
+            .setPositiveButton(context.getString(R.string.open_settings)) { dialog, _ ->
                 dialog.dismiss()
                 val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
                 intent.data = Uri.fromParts("package", context.packageName, null)
                 appSettingsLauncher.launch(intent)
             }
-            .setNegativeButton("Exit") { _, _ ->
+            .setNegativeButton(context.getString(R.string.exit)) { _, _ ->
                 onExit()
             }
         val alertDialog = builder.create()
@@ -96,14 +96,14 @@ class DialogHelper(private val context: Context) {
 
     fun showContactLimitWarningDialog(onProceed: () -> Unit) {
         val builder = AlertDialog.Builder(context)
-        builder.setTitle("Warning")
-            .setMessage("You have added a significant number of contacts. Adding too many numbers may prevent others from using the cell tower during an emergency. Are you sure you want to continue?")
+        builder.setTitle(context.getString(R.string.warning_title))
+            .setMessage(context.getString(R.string.contact_limit_warning_message))
             .setCancelable(false)
-            .setPositiveButton("Yes") { dialog, _ ->
+            .setPositiveButton(context.getString(R.string.yes)) { dialog, _ ->
                 dialog.dismiss()
                 onProceed()
             }
-            .setNegativeButton("No") { dialog, _ ->
+            .setNegativeButton(context.getString(R.string.no)) { dialog, _ ->
                 dialog.dismiss()
             }
         val alertDialog = builder.create()

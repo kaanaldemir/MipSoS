@@ -11,9 +11,11 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.appcompat.widget.AppCompatImageButton
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.material.button.MaterialButton
+import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -30,6 +32,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var pickContactsButton: Button
     private lateinit var apnSettingsButton: Button
     private lateinit var autoSendCheckbox: CheckBox
+    private lateinit var languageSwitchButton: AppCompatImageButton
 
     private lateinit var locationHelper: LocationHelper
     private lateinit var soundRecorder: SoundRecorder
@@ -51,6 +54,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        sharedPrefHelper = SharedPrefHelper(this)
+        loadLocale()
         setContentView(R.layout.activity_main)
 
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
@@ -66,9 +71,7 @@ class MainActivity : AppCompatActivity() {
         pickContactsButton = findViewById(R.id.pickContactsButton)
         apnSettingsButton = findViewById(R.id.apnSettingsButton)
         autoSendCheckbox = findViewById(R.id.autoSendCheckbox)
-
-        // Initialize sharedPrefHelper
-        sharedPrefHelper = SharedPrefHelper(this)
+        languageSwitchButton = findViewById(R.id.languageSwitchButton)
 
         // Initialize other helpers
         locationHelper = LocationHelper(this, locationTextView)
@@ -132,6 +135,10 @@ class MainActivity : AppCompatActivity() {
             sharedPrefHelper.saveAutoSendState(isChecked)
         }
 
+        languageSwitchButton.setOnClickListener {
+            showLanguageChangeDialog()
+        }
+
         messageEditText.setText(sharedPrefHelper.getMessage())
 
         playbackButton.setOnClickListener {
@@ -166,20 +173,20 @@ class MainActivity : AppCompatActivity() {
         locationHelper.getLocation { location ->
             val latitude = location?.latitude ?: 0.0
             val longitude = location?.longitude ?: 0.0
-            locationTextView.text = "Lat: $latitude Long: $longitude"
+            locationTextView.text = "${getString(R.string.lat)} $latitude ${getString(R.string.longt)} $longitude"
         }
     }
 
     private fun promptEnableLocation() {
         val builder = AlertDialog.Builder(this)
-        builder.setTitle("Enable Location")
-            .setMessage("Location services are required for this app to function properly. Please enable location services.")
+        builder.setTitle(getString(R.string.enable_location))
+            .setMessage(getString(R.string.enable_location_message))
             .setCancelable(false)
-            .setPositiveButton("Enable") { dialog, _ ->
+            .setPositiveButton(getString(R.string.enable)) { dialog, _ ->
                 val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
                 startActivityForResult(intent, ENABLE_LOCATION_REQUEST)
             }
-            .setNegativeButton("Proceed without location") { dialog, _ ->
+            .setNegativeButton(getString(R.string.proceed_without_location)) { dialog, _ ->
                 dialog.dismiss()
                 initializeApp()
             }
@@ -198,7 +205,7 @@ class MainActivity : AppCompatActivity() {
             if (locationHelper.isLocationEnabled()) {
                 initializeApp()
             } else {
-                Toast.makeText(this, "Location services are not enabled. Some features may not work properly.", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, getString(R.string.location_not_enabled), Toast.LENGTH_LONG).show()
                 initializeApp()
             }
         }
@@ -207,12 +214,12 @@ class MainActivity : AppCompatActivity() {
     private fun updateSendButtonState() {
         if (emergencyContacts.isEmpty()) {
             sendButton.isEnabled = false
-            sendButton.text = "Add Contact First"
+            sendButton.text = getString(R.string.add_contact_first)
             sendButton.setStrokeColorResource(android.R.color.darker_gray)
             sendButton.setTextColor(ContextCompat.getColor(this, android.R.color.darker_gray))
         } else {
             sendButton.isEnabled = true
-            sendButton.text = "Send SOS"
+            sendButton.text = getString(R.string.send_sos)
             sendButton.setStrokeColorResource(R.color.secondary_color)
             sendButton.setTextColor(ContextCompat.getColor(this, R.color.secondary_color))
         }
@@ -229,11 +236,11 @@ class MainActivity : AppCompatActivity() {
         val countdownTextView: TextView = dialogView.findViewById(R.id.countdownTextView)
 
         val alertDialog = AlertDialog.Builder(this)
-            .setTitle("Automatic SOS")
-            .setMessage("SOS message will be sent automatically in 10 seconds. You can cancel it.")
+            .setTitle(getString(R.string.automatic_sos))
+            .setMessage(getString(R.string.automatic_sos_message))
             .setView(dialogView)
             .setCancelable(false)
-            .setNegativeButton("Cancel") { dialog, _ ->
+            .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
                 sosTimer?.cancel()
                 dialog.dismiss()
             }
@@ -241,7 +248,7 @@ class MainActivity : AppCompatActivity() {
 
         sosTimer = object : CountDownTimer(10000, 1000) {
             override fun onTick(millisUntilFinished: Long) {
-                countdownTextView.text = "Sending SOS in: ${millisUntilFinished / 1000} seconds"
+                countdownTextView.text = "${getString(R.string.sending_sos_in)} ${millisUntilFinished / 1000} ${getString(R.string.seconds)}"
             }
 
             override fun onFinish() {
@@ -266,7 +273,7 @@ class MainActivity : AppCompatActivity() {
         val contacts = sharedPrefHelper.getEmergencyContacts()
         val location = locationHelper.getLastLocation()
         val locationMessage = if (location != null && location.latitude != 0.0 && location.longitude != 0.0) {
-            "\n\nLocation: https://maps.google.com/?q=${location.latitude},${location.longitude}"
+            "\n\n${getString(R.string.location)}: https://maps.google.com/?q=${location.latitude},${location.longitude}"
         } else {
             ""
         }
@@ -306,14 +313,14 @@ class MainActivity : AppCompatActivity() {
         permissions.forEach { permission ->
             when (permission) {
                 Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION -> includesLocation = true
-                Manifest.permission.RECORD_AUDIO -> friendlyNames.add("Microphone")
-                Manifest.permission.SEND_SMS -> friendlyNames.add("SMS")
+                Manifest.permission.RECORD_AUDIO -> friendlyNames.add(getString(R.string.microphone))
+                Manifest.permission.SEND_SMS -> friendlyNames.add(getString(R.string.sms))
                 else -> friendlyNames.add(permission)
             }
         }
 
         if (includesLocation) {
-            friendlyNames.add("Location")
+            friendlyNames.add(getString(R.string.location))
         }
 
         return friendlyNames.toList()
@@ -325,5 +332,43 @@ class MainActivity : AppCompatActivity() {
         locationHelper.stopLocationUpdates()
         sharedPrefHelper.saveMessage(messageEditText.text.toString())
         sosTimer?.cancel()
+    }
+
+    private fun showLanguageChangeDialog() {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle(getString(R.string.change_language))
+            .setMessage(getString(R.string.change_language_message))
+            .setCancelable(false)
+            .setPositiveButton(getString(R.string.yes)) { _, _ ->
+                val newLang = if (sharedPrefHelper.getLanguage() == "en") "tr" else "en"
+                sharedPrefHelper.changeDefaultMessageForLanguage(newLang)
+                sharedPrefHelper.saveLanguage(newLang)
+                restartApp()
+            }
+            .setNegativeButton(getString(R.string.no)) { dialog, _ ->
+                dialog.dismiss()
+            }
+        val alertDialog = builder.create()
+        alertDialog.show()
+    }
+
+    private fun restartApp() {
+        val intent = Intent(this, MainActivity::class.java)
+        startActivity(intent)
+        finish()
+    }
+
+    private fun loadLocale() {
+        val lang = sharedPrefHelper.getLanguage()
+        setLocale(lang)
+    }
+
+    private fun setLocale(lang: String) {
+        val locale = Locale(lang)
+        Locale.setDefault(locale)
+        val config = resources.configuration
+        config.setLocale(locale)
+        resources.updateConfiguration(config, resources.displayMetrics)
+        sharedPrefHelper.saveLanguage(lang)
     }
 }
