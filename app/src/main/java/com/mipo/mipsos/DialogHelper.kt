@@ -18,7 +18,7 @@ class DialogHelper(private val context: Context) {
         onExit: () -> Unit
     ) {
         val builder = AlertDialog.Builder(context)
-        builder.setTitle("Permissions Required")
+        builder.setTitle("Permissions Disclaimer")
             .setMessage("This app needs certain permissions to function properly. No permissions will be used to collect data or for any malicious purposes. Please grant the required permissions.")
             .setCancelable(false)
             .setPositiveButton("Proceed") { dialog, _ ->
@@ -89,6 +89,22 @@ class DialogHelper(private val context: Context) {
             }
             .setNegativeButton("Exit") { _, _ ->
                 onExit()
+            }
+        val alertDialog = builder.create()
+        alertDialog.show()
+    }
+
+    fun showContactLimitWarningDialog(onProceed: () -> Unit) {
+        val builder = AlertDialog.Builder(context)
+        builder.setTitle("Warning")
+            .setMessage("You have added a significant number of contacts. Adding too many numbers may prevent others from using the cell tower during an emergency. Are you sure you want to continue?")
+            .setCancelable(false)
+            .setPositiveButton("Yes") { dialog, _ ->
+                dialog.dismiss()
+                onProceed()
+            }
+            .setNegativeButton("No") { dialog, _ ->
+                dialog.dismiss()
             }
         val alertDialog = builder.create()
         alertDialog.show()

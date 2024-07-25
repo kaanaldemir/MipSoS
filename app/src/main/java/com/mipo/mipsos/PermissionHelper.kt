@@ -44,7 +44,8 @@ class PermissionHelper(
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.ACCESS_COARSE_LOCATION,
             Manifest.permission.RECORD_AUDIO,
-            Manifest.permission.SEND_SMS
+            Manifest.permission.SEND_SMS,
+            Manifest.permission.READ_CONTACTS
         )
 
         val permissionsNeeded = permissionsToRequest.filter {
@@ -132,6 +133,7 @@ class PermissionHelper(
                 Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION -> includesLocation = true
                 Manifest.permission.RECORD_AUDIO -> friendlyNames.add("Microphone")
                 Manifest.permission.SEND_SMS -> friendlyNames.add("SMS")
+                Manifest.permission.READ_CONTACTS -> friendlyNames.add("Contacts")
                 else -> friendlyNames.add(permission)
             }
         }

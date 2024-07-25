@@ -25,11 +25,13 @@ class ContactPickerActivity : AppCompatActivity() {
     private lateinit var contactsRecyclerView: RecyclerView
     private val emergencyContacts = mutableListOf<String>()
     private val contactsAdapter by lazy { ContactsAdapter(emergencyContacts, this) }
-
+    private lateinit var dialogHelper: DialogHelper
 
     companion object {
         private const val REQUEST_READ_CONTACTS_PERMISSION = 300
         private const val PICK_CONTACT_REQUEST = 1001
+        private const val MAX_CONTACTS_LIMIT = 50
+        private const val WARNING_CONTACTS_LIMIT = 10
     }
 
     var resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -44,6 +46,8 @@ class ContactPickerActivity : AppCompatActivity() {
         setContentView(R.layout.activity_contact_picker)
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
 
+        dialogHelper = DialogHelper(this)
+
         emergencyContacts.addAll(getEmergencyContacts()) // Load saved contacts
         contactsRecyclerView = findViewById(R.id.contactsRecyclerView)
 
@@ -52,7 +56,6 @@ class ContactPickerActivity : AppCompatActivity() {
         contactsRecyclerView.layoutManager = LinearLayoutManager(this)
         contactsRecyclerView.adapter?.notifyDataSetChanged() // Refresh RecyclerView
         contactsRecyclerView.adapter = ContactsAdapter(emergencyContacts, this)
-
 
         val pickContactsButton: Button = findViewById(R.id.pickContactsButton)
         pickContactsButton.setOnClickListener {
@@ -64,9 +67,21 @@ class ContactPickerActivity : AppCompatActivity() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_CONTACTS), REQUEST_READ_CONTACTS_PERMISSION)
         } else {
-            val pickContactIntent = Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI)
-            pickContactIntent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
-            resultLauncher.launch(pickContactIntent)
+            if (emergencyContacts.size >= MAX_CONTACTS_LIMIT) {
+                Toast.makeText(this, "You cannot add more than 50 contacts.", Toast.LENGTH_SHORT).show()
+            } else {
+                if (emergencyContacts.size >= WARNING_CONTACTS_LIMIT) {
+                    dialogHelper.showContactLimitWarningDialog {
+                        val pickContactIntent = Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI)
+                        pickContactIntent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
+                        resultLauncher.launch(pickContactIntent)
+                    }
+                } else {
+                    val pickContactIntent = Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI)
+                    pickContactIntent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
+                    resultLauncher.launch(pickContactIntent)
+                }
+            }
         }
     }
 
@@ -103,7 +118,6 @@ class ContactPickerActivity : AppCompatActivity() {
         }
     }
 
-
     private fun addEmergencyContact(phoneNumber: String) {
         emergencyContacts.add(phoneNumber)
         sharedPref.edit().putStringSet("contacts", emergencyContacts.toSet()).apply()
@@ -120,5 +134,3 @@ class ContactPickerActivity : AppCompatActivity() {
 
     // ... onRequestPermissionsResult
 }
-
-

@@ -3,9 +3,11 @@ package com.mipo.mipsos
 import android.Manifest
 import android.content.Intent
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.widget.*
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.ActivityCompat
@@ -26,6 +28,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var sendStatusTextView: TextView
     private lateinit var pickContactsButton: Button
     private lateinit var apnSettingsButton: Button
+    private lateinit var autoSendCheckbox: CheckBox
 
     private lateinit var locationHelper: LocationHelper
     private lateinit var soundRecorder: SoundRecorder
@@ -33,6 +36,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var permissionHelper: PermissionHelper
     private lateinit var dialogHelper: DialogHelper
     private lateinit var sharedPrefHelper: SharedPrefHelper
+
+    private var sosTimer: CountDownTimer? = null
 
     companion object {
         private const val REQUEST_RECORD_AUDIO_PERMISSION = 200
@@ -58,6 +63,7 @@ class MainActivity : AppCompatActivity() {
         sendButton = findViewById(R.id.sendButton)
         pickContactsButton = findViewById(R.id.pickContactsButton)
         apnSettingsButton = findViewById(R.id.apnSettingsButton)
+        autoSendCheckbox = findViewById(R.id.autoSendCheckbox)
 
         // Initialize sharedPrefHelper
         sharedPrefHelper = SharedPrefHelper(this)
@@ -99,6 +105,7 @@ class MainActivity : AppCompatActivity() {
         emergencyContacts.addAll(getEmergencyContacts())
 
         updateSendButtonState()
+        updateAutoSendCheckboxState()
 
         pickContactsButton.setOnClickListener {
             val intent = Intent(this, ContactPickerActivity::class.java)
@@ -134,6 +141,10 @@ class MainActivity : AppCompatActivity() {
             // Directly request permissions without showing the explanation dialog
             permissionHelper.checkAndRequestPermissions()
         }
+
+        if (autoSendCheckbox.isChecked && autoSendCheckbox.isEnabled) {
+            startSOSTimer()
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -142,6 +153,7 @@ class MainActivity : AppCompatActivity() {
             emergencyContacts.clear()
             emergencyContacts.addAll(getEmergencyContacts())
             updateSendButtonState()
+            updateAutoSendCheckboxState()
         }
     }
 
@@ -157,6 +169,41 @@ class MainActivity : AppCompatActivity() {
             sendButton.setStrokeColorResource(R.color.secondary_color)
             sendButton.setTextColor(ContextCompat.getColor(this, R.color.secondary_color))
         }
+    }
+
+    private fun updateAutoSendCheckboxState() {
+        autoSendCheckbox.isEnabled = emergencyContacts.isNotEmpty()
+        autoSendCheckbox.isChecked = emergencyContacts.isNotEmpty()
+        autoSendCheckbox.alpha = if (emergencyContacts.isEmpty()) 0.5f else 1.0f
+    }
+
+    private fun startSOSTimer() {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_countdown, null)
+        val countdownTextView: TextView = dialogView.findViewById(R.id.countdownTextView)
+
+        val alertDialog = AlertDialog.Builder(this)
+            .setTitle("Automatic SOS")
+            .setMessage("SOS message will be sent automatically in 10 seconds. You can cancel it.")
+            .setView(dialogView)
+            .setCancelable(false)
+            .setNegativeButton("Cancel") { dialog, _ ->
+                sosTimer?.cancel()
+                dialog.dismiss()
+            }
+            .create()
+
+        sosTimer = object : CountDownTimer(10000, 1000) {
+            override fun onTick(millisUntilFinished: Long) {
+                countdownTextView.text = "Sending SOS in: ${millisUntilFinished / 1000} seconds"
+            }
+
+            override fun onFinish() {
+                alertDialog.dismiss()
+                sendSOSMessage()
+            }
+        }
+        sosTimer?.start()
+        alertDialog.show()
     }
 
     private fun initializeApp() {
@@ -230,5 +277,6 @@ class MainActivity : AppCompatActivity() {
         soundRecorder.resetPlayer()
         locationHelper.stopLocationUpdates()
         sharedPrefHelper.saveMessage(messageEditText.text.toString())
+        sosTimer?.cancel()
     }
 }
