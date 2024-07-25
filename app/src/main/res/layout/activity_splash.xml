@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/gradient_background">
+
+    <ImageView
+        android:id="@+id/appIcon"
+        android:layout_width="195dp"
+        android:layout_height="471dp"
+        android:layout_centerInParent="true"
+        android:src="@drawable/ic_launcher_transparent" />
+
+    <ImageView
+        android:id="@+id/brandLogo"
+        android:layout_width="94dp"
+        android:layout_height="62dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="16dp"
+        android:src="@drawable/phone_brand_logo" />
+
+</RelativeLayout>
