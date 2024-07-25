@@ -161,6 +161,13 @@ class MainActivity : AppCompatActivity() {
         if (sharedPrefHelper.getAutoSendState() && autoSendCheckbox.isEnabled) {
             startSOSTimer()
         }
+
+        // Request location update as soon as possible
+        locationHelper.getLocation { location ->
+            val latitude = location?.latitude ?: 0.0
+            val longitude = location?.longitude ?: 0.0
+            locationTextView.text = "Lat: $latitude Long: $longitude"
+        }
     }
 
     private fun promptEnableLocation() {

@@ -4,18 +4,18 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
-import android.location.LocationListener
-import android.location.LocationManager
-import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.widget.TextView
 import androidx.core.content.ContextCompat
+import com.google.android.gms.location.*
 
 class LocationHelper(private val context: Context, private val locationTextView: TextView) {
 
     private var lastLocation: Location? = null
     private val handler = Handler(Looper.getMainLooper())
+    private val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
+    private lateinit var locationCallback: LocationCallback
 
     fun getLocation(callback: (Location?) -> Unit) {
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
@@ -26,48 +26,46 @@ class LocationHelper(private val context: Context, private val locationTextView:
             return
         }
 
-        val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-
-        val locationListener = object : LocationListener {
-            override fun onLocationChanged(location: Location) {
+        fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+            if (location != null) {
+                lastLocation = location
                 val latitude = location.latitude
                 val longitude = location.longitude
-
                 locationTextView.text = "Lat: $latitude Long: $longitude"
-
-                lastLocation = location
-                locationManager.removeUpdates(this)
                 callback(location)
+            } else {
+                // If the last location is null, request a location update
+                requestLocationUpdate(callback)
             }
+        }.addOnFailureListener {
+            // If there's an error getting the last location, request a location update
+            requestLocationUpdate(callback)
+        }
+    }
 
-            override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {}
-            override fun onProviderEnabled(provider: String) {
-                locationTextView.text = "Searching location..."
-            }
-
-            override fun onProviderDisabled(provider: String) {
-                locationTextView.text = "Please Enable Location!"
+    private fun requestLocationUpdate(callback: (Location?) -> Unit) {
+        locationCallback = object : LocationCallback() {
+            override fun onLocationResult(locationResult: LocationResult) {
+                locationResult ?: return
+                for (location in locationResult.locations) {
+                    lastLocation = location
+                    val latitude = location.latitude
+                    val longitude = location.longitude
+                    locationTextView.text = "Lat: $latitude Long: $longitude"
+                    callback(location)
+                }
+                fusedLocationClient.removeLocationUpdates(this)
             }
         }
 
-        val lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
-        if (lastKnownLocation != null) {
-            locationListener.onLocationChanged(lastKnownLocation)
-            callback(lastKnownLocation)
-        } else {
-            locationTextView.text = "Searching location..."
-            locationManager.requestLocationUpdates(
-                LocationManager.GPS_PROVIDER,
-                60000, // 1 minute
-                10f,
-                locationListener
-            )
-            locationManager.requestLocationUpdates(
-                LocationManager.NETWORK_PROVIDER,
-                60000, // 1 minute
-                10f,
-                locationListener
-            )
+        val locationRequest = LocationRequest.create().apply {
+            interval = 10000
+            fastestInterval = 5000
+            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        }
+
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
         }
     }
 
@@ -86,6 +84,9 @@ class LocationHelper(private val context: Context, private val locationTextView:
 
     fun stopLocationUpdates() {
         handler.removeCallbacksAndMessages(null)
+        if (::locationCallback.isInitialized) {
+            fusedLocationClient.removeLocationUpdates(locationCallback)
+        }
     }
 
     fun getLastLocation(): Location? {
@@ -93,8 +94,8 @@ class LocationHelper(private val context: Context, private val locationTextView:
     }
 
     fun isLocationEnabled(): Boolean {
-        val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
-                locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+        val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as android.location.LocationManager
+        return locationManager.isProviderEnabled(android.location.LocationManager.GPS_PROVIDER) ||
+                locationManager.isProviderEnabled(android.location.LocationManager.NETWORK_PROVIDER)
     }
 }
