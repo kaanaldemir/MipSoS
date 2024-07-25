@@ -1,7 +1,8 @@
 package com.mipo.mipsos
 
-import android.annotation.SuppressLint
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
@@ -9,6 +10,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 
 class LocationHelper(private val context: Context, private val locationTextView: TextView) {
 
@@ -16,6 +18,14 @@ class LocationHelper(private val context: Context, private val locationTextView:
     private val handler = Handler(Looper.getMainLooper())
 
     fun getLocation(callback: (Location?) -> Unit) {
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+            ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // Permissions are not granted, handle it accordingly
+            locationTextView.text = "Location permissions are not granted."
+            callback(null)
+            return
+        }
+
         val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
         val locationListener = object : LocationListener {
@@ -80,5 +90,11 @@ class LocationHelper(private val context: Context, private val locationTextView:
 
     fun getLastLocation(): Location? {
         return lastLocation
+    }
+
+    fun isLocationEnabled(): Boolean {
+        val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
+                locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
     }
 }

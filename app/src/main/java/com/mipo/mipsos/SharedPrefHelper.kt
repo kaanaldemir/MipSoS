@@ -23,4 +23,12 @@ class SharedPrefHelper(private val context: Context) {
     fun saveMessage(message: String) {
         sharedPref.edit().putString("sos_message", message).apply()
     }
+
+    fun saveAutoSendState(isChecked: Boolean) {
+        sharedPref.edit().putBoolean("auto_send_sos", isChecked).apply()
+    }
+
+    fun getAutoSendState(): Boolean {
+        return sharedPref.getBoolean("auto_send_sos", true)
+    }
 }

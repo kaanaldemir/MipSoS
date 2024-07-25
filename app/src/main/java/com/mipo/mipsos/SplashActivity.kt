@@ -17,6 +17,6 @@ class SplashActivity : AppCompatActivity() {
             startActivity(Intent(this, MainActivity::class.java))
             // Finish SplashActivity
             finish()
-        }, 3000) // 3 seconds delay
+        }, 1000) // 3 seconds delay
     }
 }

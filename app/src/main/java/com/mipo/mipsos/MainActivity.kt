@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Intent
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.provider.Settings
 import android.widget.*
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -43,6 +44,7 @@ class MainActivity : AppCompatActivity() {
         private const val REQUEST_RECORD_AUDIO_PERMISSION = 200
         private const val PICK_CONTACT_REQUEST = 1001
         private const val MESSAGE_PREF_KEY = "sos_message"
+        private const val ENABLE_LOCATION_REQUEST = 1002
     }
 
     private val emergencyContacts = mutableListOf<String>()
@@ -80,7 +82,11 @@ class MainActivity : AppCompatActivity() {
         ) { permissions ->
             val granted = permissions.entries.all { it.value }
             if (granted) {
-                initializeApp()
+                if (!locationHelper.isLocationEnabled()) {
+                    promptEnableLocation()
+                } else {
+                    initializeApp()
+                }
             } else {
                 permissionHelper.handleDeniedPermissions(permissions)
             }
@@ -98,7 +104,13 @@ class MainActivity : AppCompatActivity() {
             this,
             requestPermissionsLauncher,
             appSettingsLauncher,
-            this::initializeApp,
+            {
+                if (!locationHelper.isLocationEnabled()) {
+                    promptEnableLocation()
+                } else {
+                    initializeApp()
+                }
+            },
             this::handleDeniedPermissions
         )
 
@@ -114,6 +126,10 @@ class MainActivity : AppCompatActivity() {
 
         sendButton.setOnClickListener {
             sendSOSMessage()
+        }
+
+        autoSendCheckbox.setOnCheckedChangeListener { _, isChecked ->
+            sharedPrefHelper.saveAutoSendState(isChecked)
         }
 
         messageEditText.setText(sharedPrefHelper.getMessage())
@@ -142,9 +158,26 @@ class MainActivity : AppCompatActivity() {
             permissionHelper.checkAndRequestPermissions()
         }
 
-        if (autoSendCheckbox.isChecked && autoSendCheckbox.isEnabled) {
+        if (sharedPrefHelper.getAutoSendState() && autoSendCheckbox.isEnabled) {
             startSOSTimer()
         }
+    }
+
+    private fun promptEnableLocation() {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Enable Location")
+            .setMessage("Location services are required for this app to function properly. Please enable location services.")
+            .setCancelable(false)
+            .setPositiveButton("Enable") { dialog, _ ->
+                val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                startActivityForResult(intent, ENABLE_LOCATION_REQUEST)
+            }
+            .setNegativeButton("Proceed without location") { dialog, _ ->
+                dialog.dismiss()
+                initializeApp()
+            }
+        val alertDialog = builder.create()
+        alertDialog.show()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -154,6 +187,13 @@ class MainActivity : AppCompatActivity() {
             emergencyContacts.addAll(getEmergencyContacts())
             updateSendButtonState()
             updateAutoSendCheckboxState()
+        } else if (requestCode == ENABLE_LOCATION_REQUEST) {
+            if (locationHelper.isLocationEnabled()) {
+                initializeApp()
+            } else {
+                Toast.makeText(this, "Location services are not enabled. Some features may not work properly.", Toast.LENGTH_LONG).show()
+                initializeApp()
+            }
         }
     }
 
@@ -173,7 +213,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateAutoSendCheckboxState() {
         autoSendCheckbox.isEnabled = emergencyContacts.isNotEmpty()
-        autoSendCheckbox.isChecked = emergencyContacts.isNotEmpty()
+        autoSendCheckbox.isChecked = sharedPrefHelper.getAutoSendState() && emergencyContacts.isNotEmpty()
         autoSendCheckbox.alpha = if (emergencyContacts.isEmpty()) 0.5f else 1.0f
     }
 
