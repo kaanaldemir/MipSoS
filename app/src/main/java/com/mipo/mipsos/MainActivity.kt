@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.google.android.material.button.MaterialButton
 
 class MainActivity : AppCompatActivity() {
 
@@ -20,7 +21,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var recordButton: Button
     private lateinit var recordingStatusTextView: TextView
     private lateinit var playbackButton: Button
-    private lateinit var sendButton: Button
+    private lateinit var sendButton: MaterialButton
     private lateinit var messageEditText: EditText
     private lateinit var sendStatusTextView: TextView
     private lateinit var pickContactsButton: Button
@@ -97,6 +98,8 @@ class MainActivity : AppCompatActivity() {
 
         emergencyContacts.addAll(getEmergencyContacts())
 
+        updateSendButtonState()
+
         pickContactsButton.setOnClickListener {
             val intent = Intent(this, ContactPickerActivity::class.java)
             startActivityForResult(intent, PICK_CONTACT_REQUEST)
@@ -121,11 +124,39 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        // Show permission explanation dialog before requesting permissions
-        dialogHelper.showPermissionExplanationDialog(
-            onProceed = { permissionHelper.checkAndRequestPermissions() },
-            onExit = { finish() }
-        )
+        if (emergencyContacts.isEmpty()) {
+            // Show permission explanation dialog before requesting permissions
+            dialogHelper.showPermissionExplanationDialog(
+                onProceed = { permissionHelper.checkAndRequestPermissions() },
+                onExit = { finish() }
+            )
+        } else {
+            // Directly request permissions without showing the explanation dialog
+            permissionHelper.checkAndRequestPermissions()
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == PICK_CONTACT_REQUEST) {
+            emergencyContacts.clear()
+            emergencyContacts.addAll(getEmergencyContacts())
+            updateSendButtonState()
+        }
+    }
+
+    private fun updateSendButtonState() {
+        if (emergencyContacts.isEmpty()) {
+            sendButton.isEnabled = false
+            sendButton.text = "Add Contact First"
+            sendButton.setStrokeColorResource(android.R.color.darker_gray)
+            sendButton.setTextColor(ContextCompat.getColor(this, android.R.color.darker_gray))
+        } else {
+            sendButton.isEnabled = true
+            sendButton.text = "Send SOS"
+            sendButton.setStrokeColorResource(R.color.secondary_color)
+            sendButton.setTextColor(ContextCompat.getColor(this, R.color.secondary_color))
+        }
     }
 
     private fun initializeApp() {
@@ -139,13 +170,15 @@ class MainActivity : AppCompatActivity() {
     private fun sendSOSMessage() {
         val message = messageEditText.text.toString()
         val contacts = sharedPrefHelper.getEmergencyContacts()
-        val latitude = locationHelper.getLastLocation()?.latitude ?: 0.0
-        val longitude = locationHelper.getLastLocation()?.longitude ?: 0.0
-
-        val locationMessage = "$message\n\nLocation: https://maps.google.com/?q=$latitude,$longitude"
+        val location = locationHelper.getLastLocation()
+        val locationMessage = if (location != null && location.latitude != 0.0 && location.longitude != 0.0) {
+            "\n\nLocation: https://maps.google.com/?q=${location.latitude},${location.longitude}"
+        } else {
+            ""
+        }
 
         for (contact in contacts) {
-            smsHelper.sendSMS(contact, locationMessage)
+            smsHelper.sendSMS(contact, message + locationMessage)
         }
     }
 

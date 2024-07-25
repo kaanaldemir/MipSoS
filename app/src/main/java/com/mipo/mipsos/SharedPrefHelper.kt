@@ -5,6 +5,7 @@ import android.content.Context
 class SharedPrefHelper(private val context: Context) {
 
     private val sharedPref by lazy { context.getSharedPreferences("emergency_contacts", Context.MODE_PRIVATE) }
+    private val defaultMessage = "Emergency! Please send help to my location."
 
     fun addEmergencyContact(phoneNumber: String, emergencyContacts: MutableList<String>) {
         emergencyContacts.add(phoneNumber)
@@ -16,7 +17,7 @@ class SharedPrefHelper(private val context: Context) {
     }
 
     fun getMessage(): String {
-        return sharedPref.getString("sos_message", "") ?: ""
+        return sharedPref.getString("sos_message", defaultMessage) ?: defaultMessage
     }
 
     fun saveMessage(message: String) {
