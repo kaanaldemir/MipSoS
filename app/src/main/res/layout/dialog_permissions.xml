@@ -9,7 +9,7 @@
         android:id="@+id/dialogTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Permissions Required"
+        android:text="@string/permissions_required_title"
         android:textAppearance="?attr/textAppearanceHeadline6"
         android:textStyle="bold"
         android:paddingBottom="10dp" />

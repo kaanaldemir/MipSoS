@@ -25,14 +25,14 @@ class PermissionHelper(
 
     fun showPermissionExplanationDialog() {
         val builder = AlertDialog.Builder(context)
-        builder.setTitle("Permissions Required")
-            .setMessage("This app needs certain permissions to function properly. No permissions will be used to collect data or for any malicious purposes. Please grant the required permissions.")
+        builder.setTitle(context.getString(R.string.permissions_required))
+            .setMessage(context.getString(R.string.permissions_explanation))
             .setCancelable(false)
-            .setPositiveButton("Proceed") { dialog, _ ->
+            .setPositiveButton(context.getString(R.string.proceed)) { dialog, _ ->
                 dialog.dismiss()
                 checkAndRequestPermissions()
             }
-            .setNegativeButton("Exit") { _, _ ->
+            .setNegativeButton(context.getString(R.string.exit)) { _, _ ->
                 (context as AppCompatActivity).finish()
             }
         val alertDialog = builder.create()
@@ -77,20 +77,20 @@ class PermissionHelper(
         val dialogView = (context as AppCompatActivity).layoutInflater.inflate(R.layout.dialog_permissions, null)
         val permissionsListView: ListView = dialogView.findViewById(R.id.permissionsListView)
         val dialogTitle: TextView = dialogView.findViewById(R.id.dialogTitle)
-        dialogTitle.text = "Permissions Required"
+        dialogTitle.text = context.getString(R.string.permissions_required)
 
         val friendlyPermissions = getPermissionFriendlyNames(deniedPermissions)
         val adapter = ArrayAdapter(context, android.R.layout.simple_list_item_1, friendlyPermissions)
         permissionsListView.adapter = adapter
 
         builder.setView(dialogView)
-            .setMessage("This app needs the following permissions to function properly. Please grant all permissions.")
+            .setMessage(context.getString(R.string.permissions_needed))
             .setCancelable(false)
-            .setPositiveButton("Grant Permissions") { dialog, _ ->
+            .setPositiveButton(context.getString(R.string.grant_permissions)) { dialog, _ ->
                 dialog.dismiss()
                 checkAndRequestPermissions()
             }
-            .setNegativeButton("Exit") { _, _ ->
+            .setNegativeButton(context.getString(R.string.exit)) { _, _ ->
                 (context as AppCompatActivity).finish()
             }
         val alertDialog = builder.create()
@@ -102,22 +102,22 @@ class PermissionHelper(
         val dialogView = (context as AppCompatActivity).layoutInflater.inflate(R.layout.dialog_permissions, null)
         val permissionsListView: ListView = dialogView.findViewById(R.id.permissionsListView)
         val dialogTitle: TextView = dialogView.findViewById(R.id.dialogTitle)
-        dialogTitle.text = "Permissions Required"
+        dialogTitle.text = context.getString(R.string.permissions_required)
 
         val friendlyPermissions = getPermissionFriendlyNames(deniedPermissions.toSet())
         val adapter = ArrayAdapter(context, android.R.layout.simple_list_item_1, friendlyPermissions)
         permissionsListView.adapter = adapter
 
         builder.setView(dialogView)
-            .setMessage("Some permissions were permanently denied. Please go to app settings to grant all required permissions.")
+            .setMessage(context.getString(R.string.permissions_permanently_denied))
             .setCancelable(false)
-            .setPositiveButton("Open Settings") { dialog, _ ->
+            .setPositiveButton(context.getString(R.string.open_settings)) { dialog, _ ->
                 dialog.dismiss()
                 val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
                 intent.data = Uri.fromParts("package", context.packageName, null)
                 appSettingsLauncher.launch(intent)
             }
-            .setNegativeButton("Exit") { _, _ ->
+            .setNegativeButton(context.getString(R.string.exit)) { _, _ ->
                 (context as AppCompatActivity).finish()
             }
         val alertDialog = builder.create()
@@ -131,15 +131,15 @@ class PermissionHelper(
         permissions.forEach { permission ->
             when (permission) {
                 Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION -> includesLocation = true
-                Manifest.permission.RECORD_AUDIO -> friendlyNames.add("Microphone")
-                Manifest.permission.SEND_SMS -> friendlyNames.add("SMS")
-                Manifest.permission.READ_CONTACTS -> friendlyNames.add("Contacts")
+                Manifest.permission.RECORD_AUDIO -> friendlyNames.add(context.getString(R.string.microphone))
+                Manifest.permission.SEND_SMS -> friendlyNames.add(context.getString(R.string.sms))
+                Manifest.permission.READ_CONTACTS -> friendlyNames.add(context.getString(R.string.contacts))
                 else -> friendlyNames.add(permission)
             }
         }
 
         if (includesLocation) {
-            friendlyNames.add("Location")
+            friendlyNames.add(context.getString(R.string.location))
         }
 
         return friendlyNames.toList()

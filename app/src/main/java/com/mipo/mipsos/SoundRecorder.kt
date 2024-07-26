@@ -30,13 +30,13 @@ class SoundRecorder(private val context: Context, private val recordingStatusTex
                 try {
                     prepare()
                     start()
-                    recordingStatusTextView.text = "Recording started"
-                    recordButton.text = "Stop"
+                    recordingStatusTextView.text = context.getString(R.string.recording_started)
+                    recordButton.text = context.getString(R.string.stop)
                     playbackButton.isEnabled = false // Disable playback button during recording
                 } catch (e: IOException) {
                     Log.e("AudioRecording", "prepare() failed: ${e.message}")
-                    recordingStatusTextView.text = "Recording failed"
-                    recordButton.text = "Record Audio"
+                    recordingStatusTextView.text = context.getString(R.string.recording_failed)
+                    recordButton.text = context.getString(R.string.record_audio)
                     playbackButton.isEnabled = true // Enable playback button if recording fails
                 }
             }
@@ -52,15 +52,15 @@ class SoundRecorder(private val context: Context, private val recordingStatusTex
         }
         mediaRecorder = null
 
-        recordingStatusTextView.text = "Not Recording"
-        recordButton.text = "Record Audio"
+        recordingStatusTextView.text = context.getString(R.string.not_recording)
+        recordButton.text = context.getString(R.string.record_audio)
         playbackButton.isEnabled = true // Re-enable playback button after recording stops
 
         recordingFilePath?.let { filePath ->
             if (File(filePath).exists()) {
-                Toast.makeText(context, "Recording saved at: $filePath", Toast.LENGTH_LONG).show()
+                Toast.makeText(context, context.getString(R.string.recording_saved, filePath), Toast.LENGTH_LONG).show()
             } else {
-                Toast.makeText(context, "Error: Recording file not found", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.getString(R.string.recording_file_not_found), Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -79,7 +79,7 @@ class SoundRecorder(private val context: Context, private val recordingStatusTex
                     prepare()
                     start()
                 }
-                playbackButton.text = "Stop Playback"
+                playbackButton.text = context.getString(R.string.stop_playback)
                 isPlaying = true
             }
         }
@@ -90,7 +90,7 @@ class SoundRecorder(private val context: Context, private val recordingStatusTex
         mediaPlayer?.release()
         mediaPlayer = null
         isPlaying = false
-        playbackButton.text = "Play Recording"
+        playbackButton.text = context.getString(R.string.play_recording)
     }
 
     fun resetPlayer() {

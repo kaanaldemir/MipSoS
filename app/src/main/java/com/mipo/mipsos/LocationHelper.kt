@@ -21,7 +21,7 @@ class LocationHelper(private val context: Context, private val locationTextView:
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
             ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // Permissions are not granted, handle it accordingly
-            locationTextView.text = "Location permissions are not granted."
+            locationTextView.text = context.getString(R.string.location_permissions_not_granted)
             callback(null)
             return
         }
@@ -31,7 +31,7 @@ class LocationHelper(private val context: Context, private val locationTextView:
                 lastLocation = location
                 val latitude = location.latitude
                 val longitude = location.longitude
-                locationTextView.text = "Lat: $latitude Long: $longitude"
+                locationTextView.text = context.getString(R.string.lat_long, latitude, longitude)
                 callback(location)
             } else {
                 // If the last location is null, request a location update
@@ -51,7 +51,7 @@ class LocationHelper(private val context: Context, private val locationTextView:
                     lastLocation = location
                     val latitude = location.latitude
                     val longitude = location.longitude
-                    locationTextView.text = "Lat: $latitude Long: $longitude"
+                    locationTextView.text = context.getString(R.string.lat_long, latitude, longitude)
                     callback(location)
                 }
                 fusedLocationClient.removeLocationUpdates(this)
@@ -75,7 +75,7 @@ class LocationHelper(private val context: Context, private val locationTextView:
                 getLocation { location ->
                     val latitude = location?.latitude ?: 0.0
                     val longitude = location?.longitude ?: 0.0
-                    locationTextView.text = "Lat: $latitude Long: $longitude"
+                    locationTextView.text = context.getString(R.string.lat_long, latitude, longitude)
                 }
                 handler.postDelayed(this, 5 * 60 * 1000) // 5 minutes
             }

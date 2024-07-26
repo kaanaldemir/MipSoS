@@ -68,7 +68,7 @@ class ContactPickerActivity : AppCompatActivity() {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_CONTACTS), REQUEST_READ_CONTACTS_PERMISSION)
         } else {
             if (emergencyContacts.size >= MAX_CONTACTS_LIMIT) {
-                Toast.makeText(this, "You cannot add more than 50 contacts.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.max_contacts_limit), Toast.LENGTH_SHORT).show()
             } else {
                 if (emergencyContacts.size >= WARNING_CONTACTS_LIMIT) {
                     dialogHelper.showContactLimitWarningDialog {
@@ -112,7 +112,7 @@ class ContactPickerActivity : AppCompatActivity() {
                         }
                     }
                 } else {
-                    Toast.makeText(this, "Contact has no phone number", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, getString(R.string.contact_no_phone_number), Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -121,7 +121,7 @@ class ContactPickerActivity : AppCompatActivity() {
     private fun addEmergencyContact(phoneNumber: String) {
         emergencyContacts.add(phoneNumber)
         sharedPref.edit().putStringSet("contacts", emergencyContacts.toSet()).apply()
-        Log.d("EmergencyContacts", "Added contact: $phoneNumber")
+        Log.d("EmergencyContacts", getString(R.string.added_contact, phoneNumber))
 
         // Update the RecyclerView
         contactsRecyclerView.adapter?.notifyItemInserted(emergencyContacts.size - 1)

@@ -5,6 +5,9 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.provider.Settings
+import android.text.Editable
+import android.text.TextWatcher
+import android.util.Log
 import android.widget.*
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -40,6 +43,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var permissionHelper: PermissionHelper
     private lateinit var dialogHelper: DialogHelper
     private lateinit var sharedPrefHelper: SharedPrefHelper
+    private lateinit var messageHelper: MessageHelper
 
     private var sosTimer: CountDownTimer? = null
 
@@ -55,6 +59,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         sharedPrefHelper = SharedPrefHelper(this)
+        messageHelper = MessageHelper(this)
         loadLocale()
         setContentView(R.layout.activity_main)
 
@@ -132,6 +137,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         autoSendCheckbox.setOnCheckedChangeListener { _, isChecked ->
+            Log.d("MainActivity", "AutoSendCheckbox state changed to: $isChecked")
             sharedPrefHelper.saveAutoSendState(isChecked)
         }
 
@@ -139,7 +145,25 @@ class MainActivity : AppCompatActivity() {
             showLanguageChangeDialog()
         }
 
-        messageEditText.setText(sharedPrefHelper.getMessage())
+        // Load user-edited message
+        val userEditedMessage = messageHelper.getMessage()
+        if (userEditedMessage.isNullOrEmpty()) {
+            // Set default message if no user-edited message is found
+            val defaultMessage = getString(R.string.default_message)
+            messageEditText.setText(defaultMessage)
+            messageHelper.saveMessage(defaultMessage)
+        } else {
+            messageEditText.setText(userEditedMessage)
+        }
+
+        // Save user-edited message when text changes
+        messageEditText.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) {
+                messageHelper.saveMessage(s.toString())
+            }
+        })
 
         playbackButton.setOnClickListener {
             soundRecorder.handlePlayback()
@@ -223,11 +247,15 @@ class MainActivity : AppCompatActivity() {
             sendButton.setStrokeColorResource(R.color.secondary_color)
             sendButton.setTextColor(ContextCompat.getColor(this, R.color.secondary_color))
         }
+        Log.d("MainActivity", "SendButton state updated. isEnabled: ${sendButton.isEnabled}")
     }
 
     private fun updateAutoSendCheckboxState() {
+        val autoSendState = sharedPrefHelper.getAutoSendState()
+        Log.d("MainActivity", "AutoSendCheckbox initial state: $autoSendState")
         autoSendCheckbox.isEnabled = emergencyContacts.isNotEmpty()
-        autoSendCheckbox.isChecked = sharedPrefHelper.getAutoSendState() && emergencyContacts.isNotEmpty()
+        autoSendCheckbox.isChecked = autoSendState && emergencyContacts.isNotEmpty()
+        Log.d("MainActivity", "AutoSendCheckbox isEnabled: ${autoSendCheckbox.isEnabled}, isChecked: ${autoSendCheckbox.isChecked}")
         autoSendCheckbox.alpha = if (emergencyContacts.isEmpty()) 0.5f else 1.0f
     }
 
@@ -330,7 +358,7 @@ class MainActivity : AppCompatActivity() {
         super.onStop()
         soundRecorder.resetPlayer()
         locationHelper.stopLocationUpdates()
-        sharedPrefHelper.saveMessage(messageEditText.text.toString())
+        messageHelper.saveMessage(messageEditText.text.toString())
         sosTimer?.cancel()
     }
 
@@ -341,7 +369,16 @@ class MainActivity : AppCompatActivity() {
             .setCancelable(false)
             .setPositiveButton(getString(R.string.yes)) { _, _ ->
                 val newLang = if (sharedPrefHelper.getLanguage() == "en") "tr" else "en"
-                sharedPrefHelper.changeDefaultMessageForLanguage(newLang)
+                val currentMessage = messageEditText.text.toString()
+                val defaultMessageEn = "Emergency! Please send help to my location."
+                val defaultMessageTr = "Acil Durum! Lütfen konumuma yardım gönderin."
+
+                if (currentMessage == defaultMessageEn || currentMessage == defaultMessageTr || currentMessage.isEmpty()) {
+                    val newDefaultMessage = if (newLang == "en") defaultMessageEn else defaultMessageTr
+                    messageEditText.setText(newDefaultMessage)
+                    messageHelper.saveMessage(newDefaultMessage)
+                }
+
                 sharedPrefHelper.saveLanguage(newLang)
                 restartApp()
             }
@@ -353,7 +390,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun restartApp() {
-        val intent = Intent(this, MainActivity::class.java)
+        val intent = Intent(this, SplashActivity::class.java)
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
         startActivity(intent)
         finish()
     }
