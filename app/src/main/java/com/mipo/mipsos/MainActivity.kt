@@ -363,26 +363,36 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showLanguageChangeDialog() {
+        val languages = arrayOf("English", "Türkçe", "العربية")
+        val languageCodes = arrayOf("en", "tr", "ar")
+        val currentLangCode = sharedPrefHelper.getLanguage()
+        val currentLangIndex = languageCodes.indexOf(currentLangCode)
+
         val builder = AlertDialog.Builder(this)
         builder.setTitle(getString(R.string.change_language))
-            .setMessage(getString(R.string.change_language_message))
-            .setCancelable(false)
-            .setPositiveButton(getString(R.string.yes)) { _, _ ->
-                val newLang = if (sharedPrefHelper.getLanguage() == "en") "tr" else "en"
-                val currentMessage = messageEditText.text.toString()
+            .setSingleChoiceItems(languages, currentLangIndex) { dialog, which ->
+                val selectedLanguage = languageCodes[which]
                 val defaultMessageEn = "Emergency! Please send help to my location."
                 val defaultMessageTr = "Acil Durum! Lütfen konumuma yardım gönderin."
+                val defaultMessageAr = "حالة طوارئ! يرجى إرسال المساعدة إلى موقعي."
 
-                if (currentMessage == defaultMessageEn || currentMessage == defaultMessageTr || currentMessage.isEmpty()) {
-                    val newDefaultMessage = if (newLang == "en") defaultMessageEn else defaultMessageTr
+                val currentMessage = messageEditText.text.toString()
+                if (currentMessage == defaultMessageEn || currentMessage == defaultMessageTr || currentMessage == defaultMessageAr || currentMessage.isEmpty()) {
+                    val newDefaultMessage = when (selectedLanguage) {
+                        "en" -> defaultMessageEn
+                        "tr" -> defaultMessageTr
+                        "ar" -> defaultMessageAr
+                        else -> defaultMessageEn
+                    }
                     messageEditText.setText(newDefaultMessage)
                     messageHelper.saveMessage(newDefaultMessage)
                 }
 
-                sharedPrefHelper.saveLanguage(newLang)
+                sharedPrefHelper.saveLanguage(selectedLanguage)
+                dialog.dismiss()
                 restartApp()
             }
-            .setNegativeButton(getString(R.string.no)) { dialog, _ ->
+            .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
                 dialog.dismiss()
             }
         val alertDialog = builder.create()
