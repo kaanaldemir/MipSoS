@@ -36,6 +36,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var apnSettingsButton: Button
     private lateinit var autoSendCheckbox: CheckBox
     private lateinit var languageSwitchButton: AppCompatImageButton
+    private lateinit var themeModeButton: AppCompatImageButton
 
     private lateinit var locationHelper: LocationHelper
     private lateinit var soundRecorder: SoundRecorder
@@ -58,12 +59,11 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         sharedPrefHelper = SharedPrefHelper(this)
         messageHelper = MessageHelper(this)
         loadLocale()
         setContentView(R.layout.activity_main)
-
-        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
 
         // Initialize UI elements first
         locationTextView = findViewById(R.id.locationTextView)
@@ -77,6 +77,8 @@ class MainActivity : AppCompatActivity() {
         apnSettingsButton = findViewById(R.id.apnSettingsButton)
         autoSendCheckbox = findViewById(R.id.autoSendCheckbox)
         languageSwitchButton = findViewById(R.id.languageSwitchButton)
+        themeModeButton = findViewById(R.id.themeModeButton)
+
 
         // Initialize other helpers
         locationHelper = LocationHelper(this, locationTextView)
@@ -143,6 +145,10 @@ class MainActivity : AppCompatActivity() {
 
         languageSwitchButton.setOnClickListener {
             showLanguageChangeDialog()
+        }
+
+        themeModeButton.setOnClickListener {
+            showThemeModeDialog()
         }
 
         // Load user-edited message
@@ -399,12 +405,40 @@ class MainActivity : AppCompatActivity() {
         alertDialog.show()
     }
 
-    private fun restartApp() {
-        val intent = Intent(this, SplashActivity::class.java)
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-        startActivity(intent)
-        finish()
+    private fun showThemeModeDialog() {
+        val modes = arrayOf(
+            getString(R.string.night_mode),
+            getString(R.string.day_mode),
+            getString(R.string.follow_system_mode)
+        )
+        val currentMode = sharedPrefHelper.getThemeMode()
+        val currentModeIndex = when (currentMode) {
+            AppCompatDelegate.MODE_NIGHT_NO -> 1
+            AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM -> 2
+            else -> 0
+        }
+
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle(getString(R.string.select_theme_mode))
+            .setSingleChoiceItems(modes, currentModeIndex) { dialog, which ->
+                val selectedMode = when (which) {
+                    1 -> AppCompatDelegate.MODE_NIGHT_NO
+                    2 -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+                    else -> AppCompatDelegate.MODE_NIGHT_YES
+                }
+                sharedPrefHelper.saveThemeMode(selectedMode)
+                AppCompatDelegate.setDefaultNightMode(selectedMode)
+                dialog.dismiss()
+                restartApp()
+            }
+            .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
+                dialog.dismiss()
+            }
+        val alertDialog = builder.create()
+        alertDialog.show()
     }
+
+
 
     private fun loadLocale() {
         val lang = sharedPrefHelper.getLanguage()
@@ -418,5 +452,12 @@ class MainActivity : AppCompatActivity() {
         config.setLocale(locale)
         resources.updateConfiguration(config, resources.displayMetrics)
         sharedPrefHelper.saveLanguage(lang)
+    }
+
+    private fun restartApp() {
+        val intent = Intent(this, SplashActivity::class.java)
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+        startActivity(intent)
+        finish()
     }
 }

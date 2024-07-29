@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="ic_launcher_background">#52181D</color>
+    <color name="ic_launcher_background">#FFCDD2</color> <!-- Lighter background color for day mode -->
 </resources>

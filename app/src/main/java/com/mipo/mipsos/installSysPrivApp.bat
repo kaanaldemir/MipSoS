@@ -78,7 +78,7 @@ echo Creating module.prop file...
 (
 echo id=%dir_app_name%
 echo name=%dir_app_name%
-echo version=1.0.8
+echo version=1.0.9
 echo versionCode=1
 echo author=Kaan
 echo description=Installs the app inside system/priv-app and includes permissions inside privapp-permissions-platform.xml
@@ -112,4 +112,23 @@ del module.prop
 echo Rebooting device...
 %ADB_SH% "reboot"
 
-echo APK installation completed.
+:: Wait for the device to reboot
+echo Waiting for device to reboot...
+:wait_for_device
+%ADB% wait-for-device
+echo Device found, continuing...
+
+:: Wait an additional 60 seconds to ensure the system is fully booted
+echo Waiting for system to fully boot...
+set wait_time=10
+:wait_loop
+set /a wait_time=wait_time-1
+ping 127.0.0.1 -n 2 >nul
+if %wait_time% gtr 0 goto wait_loop
+
+:: Install the APK as a user app to ensure all permissions are granted
+echo Installing APK as user app to ensure permissions...
+%ADB% install -r %apk_host%
+
+echo APK installation and launch completed.
+exit

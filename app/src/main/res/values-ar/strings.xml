@@ -80,4 +80,8 @@
     <string name="default_message">طوارئ! يرجى إرسال المساعدة إلى موقعي.</string>
     <string name="emergency_contacts">جهات اتصال الطوارئ</string>
     <string name="add_contact">إضافة جهات اتصال</string>
+    <string name="select_theme_mode">اختر وضع السمة</string>
+    <string name="night_mode">الليل</string>
+    <string name="day_mode">النهار</string>
+    <string name="follow_system_mode">اتبع النظام</string>
 </resources>

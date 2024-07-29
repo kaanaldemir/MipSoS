@@ -80,4 +80,8 @@
     <string name="default_message">Acil Durum! Lütfen konumuma yardım gönderin.</string>
     <string name="emergency_contacts">Kişiler</string>
     <string name="add_contact">Kişi Ekle</string>
+    <string name="select_theme_mode">Tema Modunu Seç</string>
+    <string name="night_mode">Gece</string>
+    <string name="day_mode">Gündüz</string>
+    <string name="follow_system_mode">Sistemi Takip Et</string>
 </resources>

@@ -1,12 +1,17 @@
 package com.mipo.mipsos
 
 import android.content.Context
+import androidx.appcompat.app.AppCompatDelegate
 
 class SharedPrefHelper(private val context: Context) {
 
     private val sharedPref by lazy { context.getSharedPreferences("emergency_contacts", Context.MODE_PRIVATE) }
     private val defaultMessageEn = "Emergency! Please send help to my location."
     private val defaultMessageTr = "Acil Durum! Lütfen konumuma yardım gönderin."
+
+    companion object {
+        private const val THEME_MODE_KEY = "theme_mode"
+    }
 
     fun addEmergencyContact(phoneNumber: String, emergencyContacts: MutableList<String>) {
         emergencyContacts.add(phoneNumber)
@@ -34,7 +39,7 @@ class SharedPrefHelper(private val context: Context) {
     }
 
     fun getLanguage(): String {
-        return sharedPref.getString("language", "en") ?: "en"
+        return sharedPref.getString("language", "tr") ?: "tr"
     }
 
     fun saveLanguage(lang: String) {
@@ -51,5 +56,13 @@ class SharedPrefHelper(private val context: Context) {
             currentMessage
         }
         saveMessage(newMessage)
+    }
+
+    fun saveThemeMode(mode: Int) {
+        sharedPref.edit().putInt(THEME_MODE_KEY, mode).apply()
+    }
+
+    fun getThemeMode(): Int {
+        return sharedPref.getInt(THEME_MODE_KEY, AppCompatDelegate.MODE_NIGHT_YES)
     }
 }

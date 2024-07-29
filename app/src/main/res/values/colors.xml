@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primary_color">#D32F2F</color>
-    <color name="secondary_color">#B71C1C</color>
-    <color name="tertiary_color">#9A0007</color>
-    <color name="background_color">#121212</color>
-    <color name="primary_text_color">#BDBDBD</color>
-    <color name="secondary_text_color">#BDBDBD</color>  </resources>
+    <color name="primary_color">#F44336</color> <!-- Lighter primary color -->
+    <color name="secondary_color">#E53935</color> <!-- Lighter secondary color -->
+    <color name="tertiary_color">#D32F2F</color> <!-- Lighter tertiary color -->
+    <color name="background_color">#C8C8C8</color> <!-- Light background color -->
+    <color name="primary_text_color">#212121</color> <!-- Dark text for readability -->
+    <color name="secondary_text_color">#757575</color> <!-- Slightly lighter dark text -->
+</resources>

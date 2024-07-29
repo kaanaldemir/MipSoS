@@ -5,18 +5,31 @@
     android:layout_height="match_parent"
     android:background="@drawable/gradient_background">
 
+
+    <ImageButton
+        android:id="@+id/themeModeButton"
+        android:layout_width="36dp"
+        android:layout_height="45dp"
+        android:layout_above="@+id/cardView"
+        android:layout_below="@+id/appIcon"
+        android:layout_alignStart="@+id/cardView"
+        android:layout_marginStart="2dp"
+        android:layout_marginTop="-26dp"
+        android:layout_marginEnd="98dp"
+        android:layout_marginBottom="-5dp"
+        android:layout_toEndOf="@+id/appIcon"
+        android:background="@drawable/ic_day_night_mode_button" />
+
     <ImageButton
         android:id="@+id/languageSwitchButton"
-        android:layout_width="51dp"
-        android:layout_height="48dp"
+        android:layout_width="63dp"
+        android:layout_height="wrap_content"
         android:layout_above="@+id/cardView"
         android:layout_below="@+id/appIcon"
         android:layout_alignEnd="@+id/cardView"
-        android:layout_marginStart="96dp"
-        android:layout_marginTop="-39dp"
+        android:layout_marginTop="-38dp"
         android:layout_marginEnd="-7dp"
         android:layout_marginBottom="-9dp"
-        android:layout_toEndOf="@+id/appIcon"
         android:background="@drawable/language_switch2" />
 
     <ImageView

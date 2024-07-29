@@ -12,9 +12,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import android.os.Handler
-import android.os.Looper
-import java.util.concurrent.Executors
 
 class ApnSettingsActivity : AppCompatActivity() {
 
@@ -55,173 +52,102 @@ class ApnSettingsActivity : AppCompatActivity() {
                 apnList.add(Apn(id, name, apn))
             }
 
-            startNetworkScan()
+            getSignalStrength()
             adapter.notifyDataSetChanged()
         }
     }
 
-    private fun startNetworkScan() {
-        val telephonyManager = getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager?
-        if (telephonyManager == null) {
-            Log.e("APNApp", getString(R.string.telephony_manager_null))
-            return
-        }
-
+    private fun getSignalStrength() {
+        val telephonyManager = getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // Permission is not granted
-            Log.d("APNApp", getString(R.string.permission_not_granted))
+            Log.d("APNApp", "Permission not granted")
             return
         }
 
-        val radioAccessSpecifier = arrayOf(
-            RadioAccessSpecifier(
-                AccessNetworkConstants.AccessNetworkType.GERAN,
-                intArrayOf(900, 1800), // Specify bands for GERAN (GSM)
-                null // channels (null means scan all)
-            ),
-            RadioAccessSpecifier(
-                AccessNetworkConstants.AccessNetworkType.UTRAN,
-                intArrayOf(2100), // Specify bands for UTRAN (UMTS)
-                null // channels
-            ),
-            RadioAccessSpecifier(
-                AccessNetworkConstants.AccessNetworkType.EUTRAN,
-                intArrayOf(1800, 2600), // Specify bands for EUTRAN (LTE)
-                null // channels
-            )
-        )
+        val cellInfoList = telephonyManager.allCellInfo
+        Log.d("APNApp", "Cell Info List Size: ${cellInfoList.size}")
 
-        // Add PLMN IDs for Turkey
-        val plmnIds = arrayListOf("28601", "28602", "28603") // Turkcell, Vodafone Türkiye, Türk Telekom
+        val signalStrengthMap = mutableMapOf<String, MutableList<Int>>()
 
-        val networkScanRequest = NetworkScanRequest(
-            NetworkScanRequest.SCAN_TYPE_ONE_SHOT,
-            radioAccessSpecifier,
-            5, // periodicity - not used for one-shot scans
-            60, // max search time in seconds
-            true, // incremental results
-            5, // incremental results periodicity in seconds
-            plmnIds // PLMN ids to search for
-        )
-
-        val networkScanCallback = object : TelephonyScanManager.NetworkScanCallback() {
-            override fun onResults(results: List<CellInfo>) {
-                super.onResults(results)
-                Log.d("APNApp", getString(R.string.network_scan_results, results.size))
-
-                val signalStrengthMap = mutableMapOf<String, MutableList<Int>>()
-
-                for (cellInfo in results) {
-                    when (cellInfo) {
-                        is CellInfoLte -> {
-                            val cellSignalStrengthLte = cellInfo.cellSignalStrength
-                            val networkName = cellInfo.cellIdentity.operatorAlphaLong?.toString() ?: getString(R.string.unknown)
-                            val mcc = cellInfo.cellIdentity.mccString?.toIntOrNull()
-                            val mnc = cellInfo.cellIdentity.mncString?.toIntOrNull()
-                            val providerKey = getProviderKey(mcc, mnc, networkName)
-                            Log.d("APNApp", getString(R.string.lte_signal_strength, cellSignalStrengthLte.dbm, providerKey))
-                            signalStrengthMap.getOrPut(providerKey) { mutableListOf() }.add(cellSignalStrengthLte.dbm)
-                        }
-                        is CellInfoGsm -> {
-                            val cellSignalStrengthGsm = cellInfo.cellSignalStrength
-                            val networkName = cellInfo.cellIdentity.operatorAlphaLong?.toString() ?: getString(R.string.unknown)
-                            val mcc = cellInfo.cellIdentity.mccString?.toIntOrNull()
-                            val mnc = cellInfo.cellIdentity.mncString?.toIntOrNull()
-                            val providerKey = getProviderKey(mcc, mnc, networkName)
-                            Log.d("APNApp", getString(R.string.gsm_signal_strength, cellSignalStrengthGsm.dbm, providerKey))
-                            signalStrengthMap.getOrPut(providerKey) { mutableListOf() }.add(cellSignalStrengthGsm.dbm)
-                        }
-                        is CellInfoCdma -> {
-                            val cellSignalStrengthCdma = cellInfo.cellSignalStrength
-                            val networkName = cellInfo.cellIdentity.operatorAlphaLong?.toString() ?: getString(R.string.unknown)
-                            val providerKey = getProviderKey(null, null, networkName)
-                            Log.d("APNApp", getString(R.string.cdma_signal_strength, cellSignalStrengthCdma.dbm, providerKey))
-                            signalStrengthMap.getOrPut(providerKey) { mutableListOf() }.add(cellSignalStrengthCdma.dbm)
-                        }
-                        is CellInfoWcdma -> {
-                            val cellSignalStrengthWcdma = cellInfo.cellSignalStrength
-                            val networkName = cellInfo.cellIdentity.operatorAlphaLong?.toString() ?: getString(R.string.unknown)
-                            val mcc = cellInfo.cellIdentity.mccString?.toIntOrNull()
-                            val mnc = cellInfo.cellIdentity.mncString?.toIntOrNull()
-                            val providerKey = getProviderKey(mcc, mnc, networkName)
-                            Log.d("APNApp", getString(R.string.wcdma_signal_strength, cellSignalStrengthWcdma.dbm, providerKey))
-                            signalStrengthMap.getOrPut(providerKey) { mutableListOf() }.add(cellSignalStrengthWcdma.dbm)
-                        }
-                        else -> {
-                            Log.d("APNApp", getString(R.string.unknown_cell_info, cellInfo.javaClass))
-                        }
-                    }
+        for (cellInfo in cellInfoList) {
+            when (cellInfo) {
+                is CellInfoLte -> {
+                    val cellSignalStrengthLte = cellInfo.cellSignalStrength
+                    val networkName = cellInfo.cellIdentity.operatorAlphaLong?.toString() ?: "Unknown"
+                    val mcc = cellInfo.cellIdentity.mccString?.toIntOrNull()
+                    val mnc = cellInfo.cellIdentity.mncString?.toIntOrNull()
+                    val providerKey = getProviderKey(mcc, mnc, networkName)
+                    Log.d("APNApp", "LTE Signal Strength: ${cellSignalStrengthLte.dbm} for $providerKey")
+                    Log.d("APNApp", "Cell Identity LTE: ${cellInfo.cellIdentity}")
+                    signalStrengthMap.getOrPut(providerKey) { mutableListOf() }.add(cellSignalStrengthLte.dbm)
                 }
-
-                // Assign signal strength to APNs based on the provider key
-                for (apn in apnList) {
-                    val providerKey = getProviderKeyForApn(apn.name)
-                    val signalStrengths = signalStrengthMap[providerKey]
-                    if (signalStrengths != null && signalStrengths.isNotEmpty()) {
-                        apn.signalStrength = signalStrengths.average().toInt()
-                    } else {
-                        apn.signalStrength = -120 // Default value for no signal
-                    }
-                    if (apn.signalStrength != -120) {
-                        Log.d("APNApp", getString(R.string.apn_signal_strength, apn.name, apn.signalStrength))
-                    }
+                is CellInfoGsm -> {
+                    val cellSignalStrengthGsm = cellInfo.cellSignalStrength
+                    val networkName = cellInfo.cellIdentity.operatorAlphaLong?.toString() ?: "Unknown"
+                    val mcc = cellInfo.cellIdentity.mccString?.toIntOrNull()
+                    val mnc = cellInfo.cellIdentity.mncString?.toIntOrNull()
+                    val providerKey = getProviderKey(mcc, mnc, networkName)
+                    Log.d("APNApp", "GSM Signal Strength: ${cellSignalStrengthGsm.dbm} for $providerKey")
+                    Log.d("APNApp", "Cell Identity GSM: ${cellInfo.cellIdentity}")
+                    signalStrengthMap.getOrPut(providerKey) { mutableListOf() }.add(cellSignalStrengthGsm.dbm)
                 }
-
-                apnList.sortByDescending { it.signalStrength }
-                adapter.notifyDataSetChanged()
-            }
-
-            override fun onComplete() {
-                super.onComplete()
-                Log.d("APNApp", getString(R.string.network_scan_complete))
-            }
-
-            override fun onError(error: Int) {
-                super.onError(error)
-                Log.d("APNApp", getString(R.string.network_scan_error, error))
-                if (error == 3) { // ERROR_MODEM_UNAVAILABLE
-                    retryNetworkScan()
+                is CellInfoCdma -> {
+                    val cellSignalStrengthCdma = cellInfo.cellSignalStrength
+                    val networkName = cellInfo.cellIdentity.operatorAlphaLong?.toString() ?: "Unknown"
+                    val providerKey = getProviderKey(null, null, networkName)
+                    Log.d("APNApp", "CDMA Signal Strength: ${cellSignalStrengthCdma.dbm} for $providerKey")
+                    Log.d("APNApp", "Cell Identity CDMA: ${cellInfo.cellIdentity}")
+                    signalStrengthMap.getOrPut(providerKey) { mutableListOf() }.add(cellSignalStrengthCdma.dbm)
+                }
+                is CellInfoWcdma -> {
+                    val cellSignalStrengthWcdma = cellInfo.cellSignalStrength
+                    val networkName = cellInfo.cellIdentity.operatorAlphaLong?.toString() ?: "Unknown"
+                    val mcc = cellInfo.cellIdentity.mccString?.toIntOrNull()
+                    val mnc = cellInfo.cellIdentity.mncString?.toIntOrNull()
+                    val providerKey = getProviderKey(mcc, mnc, networkName)
+                    Log.d("APNApp", "WCDMA Signal Strength: ${cellSignalStrengthWcdma.dbm} for $providerKey")
+                    Log.d("APNApp", "Cell Identity WCDMA: ${cellInfo.cellIdentity} for $providerKey")
+                    signalStrengthMap.getOrPut(providerKey) { mutableListOf() }.add(cellSignalStrengthWcdma.dbm)
+                }
+                else -> {
+                    Log.d("APNApp", "Unknown cell info type: ${cellInfo.javaClass}")
                 }
             }
         }
 
-        val executor = Executors.newSingleThreadExecutor()
-        try {
-            telephonyManager.requestNetworkScan(networkScanRequest, executor, networkScanCallback)
-        } catch (e: Exception) {
-            Log.e("APNApp", getString(R.string.failed_start_network_scan), e)
+        // Assign signal strength to APNs based on the provider key
+        for (apn in apnList) {
+            val providerKey = getProviderKeyForApn(apn.name)
+            val signalStrengths = signalStrengthMap[providerKey]
+            if (signalStrengths != null && signalStrengths.isNotEmpty()) {
+                apn.signalStrength = signalStrengths.average().toInt()
+            } else {
+                apn.signalStrength = -120 // Default value for no signal
+            }
+            if (apn.signalStrength != -120) {
+                Log.d("APNApp", "APN: ${apn.name} assigned signal strength: ${apn.signalStrength}")
+            }
         }
+
+        apnList.sortByDescending { it.signalStrength }
     }
 
-    private var retryCount = 0
-    private val maxRetries = 3
-
-    private fun retryNetworkScan() {
-        if (retryCount < maxRetries) {
-            retryCount++
-            Handler(Looper.getMainLooper()).postDelayed({
-                startNetworkScan()
-            }, 5000) // Retry after 5 seconds
-        } else {
-            Log.e("APNApp", getString(R.string.max_retry_attempts_reached))
-        }
-    }
     private fun getProviderKey(mcc: Int?, mnc: Int?, networkName: String): String {
         return when {
-            mcc == 286 && mnc == 1 -> getString(R.string.turkcell)
-            mcc == 286 && mnc == 2 -> getString(R.string.vodafone_turkey)
-            mcc == 286 && mnc == 3 -> getString(R.string.turk_telekom)
+            mcc == 286 && mnc == 1 -> "Turkcell"
+            mcc == 286 && mnc == 2 -> "Vodafone Türkiye"
+            mcc == 286 && mnc == 3 -> "Türk Telekom"
             else -> networkName
         }
     }
 
     private fun getProviderKeyForApn(apnName: String): String {
         return when {
-            apnName.contains("Turkcell", ignoreCase = true) -> getString(R.string.turkcell)
-            apnName.contains("Vodafone", ignoreCase = true) -> getString(R.string.vodafone_turkey)
-            apnName.contains("Türk Telekom", ignoreCase = true) -> getString(R.string.turk_telekom)
-            else -> getString(R.string.unknown)
+            apnName.contains("Turkcell", ignoreCase = true) -> "Turkcell"
+            apnName.contains("Vodafone", ignoreCase = true) -> "Vodafone Türkiye"
+            apnName.contains("Türk Telekom", ignoreCase = true) -> "Türk Telekom"
+            else -> "Unknown"
         }
     }
-
 }
