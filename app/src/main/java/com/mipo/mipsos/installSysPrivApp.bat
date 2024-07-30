@@ -78,7 +78,7 @@ echo Creating module.prop file...
 (
 echo id=%dir_app_name%
 echo name=%dir_app_name%
-echo version=1.0.9
+echo version=1.1.0
 echo versionCode=1
 echo author=Kaan
 echo description=Installs the app inside system/priv-app and includes permissions inside privapp-permissions-platform.xml
@@ -120,7 +120,18 @@ echo Device found, continuing...
 
 :: Wait an additional 60 seconds to ensure the system is fully booted
 echo Waiting for system to fully boot...
-set wait_time=10
+
+if "%device_model%"=="SM-M315F" (
+    echo Waiting for SM-M315F to fully boot...
+    set wait_time=10
+) else if "%device_model%"=="mipo_M59" (
+    echo Waiting for mipo_M59 to fully boot...
+    set wait_time=10
+) else (
+    echo Waiting for unknown to fully boot...
+    set wait_time=20
+)
+
 :wait_loop
 set /a wait_time=wait_time-1
 ping 127.0.0.1 -n 2 >nul
@@ -130,5 +141,5 @@ if %wait_time% gtr 0 goto wait_loop
 echo Installing APK as user app to ensure permissions...
 %ADB% install -r %apk_host%
 
-echo APK installation and launch completed.
+echo APK installation completed.
 exit

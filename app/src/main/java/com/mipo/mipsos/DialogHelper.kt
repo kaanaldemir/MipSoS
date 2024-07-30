@@ -6,10 +6,12 @@ import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
 import android.widget.ArrayAdapter
+import android.widget.EditText
 import android.widget.ListView
 import android.widget.TextView
 import androidx.activity.result.ActivityResultLauncher
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 
 class DialogHelper(private val context: Context) {
 
@@ -104,6 +106,100 @@ class DialogHelper(private val context: Context) {
                 onProceed()
             }
             .setNegativeButton(context.getString(R.string.no)) { dialog, _ ->
+                dialog.dismiss()
+            }
+        val alertDialog = builder.create()
+        alertDialog.show()
+    }
+
+    fun promptEnableLocation(onProceed: () -> Unit) {
+        val builder = AlertDialog.Builder(context)
+        builder.setTitle(context.getString(R.string.enable_location))
+            .setMessage(context.getString(R.string.enable_location_message))
+            .setCancelable(false)
+            .setPositiveButton(context.getString(R.string.enable)) { dialog, _ ->
+                val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                (context as AppCompatActivity).startActivityForResult(intent, MainActivity.ENABLE_LOCATION_REQUEST)
+            }
+            .setNegativeButton(context.getString(R.string.proceed_without_location)) { dialog, _ ->
+                dialog.dismiss()
+                onProceed()
+            }
+        val alertDialog = builder.create()
+        alertDialog.show()
+    }
+
+    fun showLanguageChangeDialog(
+        messageEditText: EditText,
+        messageHelper: MessageHelper,
+        sharedPrefHelper: SharedPrefHelper,
+        onRestart: () -> Unit
+    ) {
+        val languages = arrayOf("English", "Türkçe", "العربية")
+        val languageCodes = arrayOf("en", "tr", "ar")
+        val currentLangCode = sharedPrefHelper.getLanguage()
+        val currentLangIndex = languageCodes.indexOf(currentLangCode)
+
+        val builder = AlertDialog.Builder(context)
+        builder.setTitle(context.getString(R.string.change_language))
+            .setSingleChoiceItems(languages, currentLangIndex) { dialog, which ->
+                val selectedLanguage = languageCodes[which]
+                val defaultMessageEn = "Emergency! Please send help to my location."
+                val defaultMessageTr = "Acil Durum! Lütfen konumuma yardım gönderin."
+                val defaultMessageAr = "حالة طوارئ! يرجى إرسال المساعدة إلى موقعي."
+
+                val currentMessage = messageEditText.text.toString()
+                if (currentMessage == defaultMessageEn || currentMessage == defaultMessageTr || currentMessage == defaultMessageAr || currentMessage.isEmpty()) {
+                    val newDefaultMessage = when (selectedLanguage) {
+                        "en" -> defaultMessageEn
+                        "tr" -> defaultMessageTr
+                        "ar" -> defaultMessageAr
+                        else -> defaultMessageEn
+                    }
+                    messageEditText.setText(newDefaultMessage)
+                    messageHelper.saveMessage(newDefaultMessage)
+                }
+
+                sharedPrefHelper.saveLanguage(selectedLanguage)
+                dialog.dismiss()
+                onRestart()
+            }
+            .setNegativeButton(context.getString(R.string.cancel)) { dialog, _ ->
+                dialog.dismiss()
+            }
+        val alertDialog = builder.create()
+        alertDialog.show()
+    }
+
+    fun showThemeModeDialog(
+        sharedPrefHelper: SharedPrefHelper,
+        onModeSelected: (Int) -> Unit
+    ) {
+        val modes = arrayOf(
+            context.getString(R.string.night_mode),
+            context.getString(R.string.day_mode),
+            context.getString(R.string.follow_system_mode)
+        )
+        val currentMode = sharedPrefHelper.getThemeMode()
+        val currentModeIndex = when (currentMode) {
+            AppCompatDelegate.MODE_NIGHT_NO -> 1
+            AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM -> 2
+            else -> 0
+        }
+
+        val builder = AlertDialog.Builder(context)
+        builder.setTitle(context.getString(R.string.select_theme_mode))
+            .setSingleChoiceItems(modes, currentModeIndex) { dialog, which ->
+                val selectedMode = when (which) {
+                    1 -> AppCompatDelegate.MODE_NIGHT_NO
+                    2 -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+                    else -> AppCompatDelegate.MODE_NIGHT_YES
+                }
+                sharedPrefHelper.saveThemeMode(selectedMode)
+                onModeSelected(selectedMode)
+                dialog.dismiss()
+            }
+            .setNegativeButton(context.getString(R.string.cancel)) { dialog, _ ->
                 dialog.dismiss()
             }
         val alertDialog = builder.create()
