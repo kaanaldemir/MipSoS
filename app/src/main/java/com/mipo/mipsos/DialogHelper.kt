@@ -112,6 +112,28 @@ class DialogHelper(private val context: Context) {
         alertDialog.show()
     }
 
+
+    fun showIntervalSelectionDialog(onIntervalSelected: (Long) -> Unit) {
+        val intervals = arrayOf(
+            context.getString(R.string.interval_5_seconds),
+            context.getString(R.string.interval_10_seconds),
+            context.getString(R.string.interval_15_seconds)
+        )
+        val intervalValues = arrayOf(5000L, 10000L, 15000L)
+
+        val builder = AlertDialog.Builder(context)
+        builder.setTitle(context.getString(R.string.select_interval))
+            .setItems(intervals) { dialog, which ->
+                onIntervalSelected(intervalValues[which])
+                dialog.dismiss()
+            }
+            .setNegativeButton(context.getString(R.string.cancel_interval)) { dialog, _ ->
+                dialog.dismiss()
+            }
+        val alertDialog = builder.create()
+        alertDialog.show()
+    }
+
     fun promptEnableLocation(onProceed: () -> Unit) {
         val builder = AlertDialog.Builder(context)
         builder.setTitle(context.getString(R.string.enable_location))

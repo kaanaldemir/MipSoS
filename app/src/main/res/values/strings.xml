@@ -47,8 +47,6 @@
     <string name="stop">Stop</string>
     <string name="recording_saved">Recording saved</string>
     <string name="recording_file_not_found">Error: Recording file not found</string>
-    <string name="stop_playback">Stop Playback</string>
-    <string name="play_recording">Play Recording</string>
     <string name="signal_strength">Signal Strength: %d</string>
     <string name="telephony_manager_null">TelephonyManager is null</string>
     <string name="permission_not_granted">Permission not granted</string>
@@ -84,4 +82,14 @@
     <string name="night_mode">Night</string>
     <string name="day_mode">Day</string>
     <string name="follow_system_mode">Follow System</string>
+    <string name="use_provided_sound" />
+    <string name="playback_intervals">Interval</string>
+    <string name="play_whistle">Whistle</string>
+    <string name="interval_5_seconds">5 seconds</string>
+    <string name="interval_10_seconds">10 seconds</string>
+    <string name="interval_15_seconds">15 seconds</string>
+    <string name="select_interval">Select Interval</string>
+    <string name="cancel_interval">Cancel</string>
+    <string name="stop_playback">Stop</string>
+    <string name="play_recording">Play</string>
 </resources>

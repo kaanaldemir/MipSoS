@@ -4,9 +4,11 @@ import android.Manifest
 import android.content.Intent
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.os.Handler
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
+import android.view.View
 import android.widget.*
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -17,6 +19,7 @@ import androidx.appcompat.widget.AppCompatImageButton
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.material.button.MaterialButton
+import java.io.File
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
@@ -36,6 +39,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var autoSendCheckbox: CheckBox
     private lateinit var languageSwitchButton: AppCompatImageButton
     private lateinit var themeModeButton: AppCompatImageButton
+    private lateinit var soundSourceSwitch: Switch
+    private lateinit var playbackIntervalCheckbox: CheckBox
 
     private lateinit var locationHelper: LocationHelper
     private lateinit var soundRecorder: SoundRecorder
@@ -46,6 +51,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var messageHelper: MessageHelper
 
     private var sosTimer: CountDownTimer? = null
+    private var selectedInterval: Long = 0
 
     companion object {
         private const val PICK_CONTACT_REQUEST = 1001
@@ -75,13 +81,36 @@ class MainActivity : AppCompatActivity() {
         autoSendCheckbox = findViewById(R.id.autoSendCheckbox)
         languageSwitchButton = findViewById(R.id.languageSwitchButton)
         themeModeButton = findViewById(R.id.themeModeButton)
-
+        soundSourceSwitch = findViewById(R.id.soundSourceSwitch)
+        playbackIntervalCheckbox = findViewById(R.id.playbackIntervalCheckbox)
 
         // Initialize other helpers
         locationHelper = LocationHelper(this, locationTextView)
         soundRecorder = SoundRecorder(this, recordingStatusTextView, recordButton, playbackButton)
         smsHelper = SmsHelper(this, sendStatusTextView)
         dialogHelper = DialogHelper(this)
+
+        // Show/hide the interval selection dialog based on the checkbox state
+        playbackIntervalCheckbox.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                dialogHelper.showIntervalSelectionDialog { interval ->
+                    selectedInterval = interval
+                }
+            } else {
+                selectedInterval = 0
+            }
+        }
+
+        // Enable/disable playback button and change text if the switch is toggled to provided sound
+        soundSourceSwitch.setOnCheckedChangeListener { _, isChecked ->
+            playbackButton.isEnabled = isChecked || soundRecorder.hasRecorded()
+            playbackButton.text = if (isChecked) getString(R.string.play_whistle) else getString(R.string.play_recording)
+
+            // Disable the playback button if switching back to recording and no recording exists
+            if (!isChecked && !soundRecorder.hasRecorded()) {
+                playbackButton.isEnabled = false
+            }
+        }
 
         // Initialize launchers
         requestPermissionsLauncher = registerForActivityResult(
@@ -180,7 +209,9 @@ class MainActivity : AppCompatActivity() {
         })
 
         playbackButton.setOnClickListener {
-            soundRecorder.handlePlayback()
+            val useProvidedSound = soundSourceSwitch.isChecked
+            val intervalPlayback = playbackIntervalCheckbox.isChecked
+            soundRecorder.handlePlayback(useProvidedSound, intervalPlayback, selectedInterval)
         }
         playbackButton.isEnabled = false
 

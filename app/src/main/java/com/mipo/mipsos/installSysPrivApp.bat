@@ -40,12 +40,18 @@ if "%device_model%"=="SM-M315F" (
     set permissions_xml_name=privapp-permissions-platform.xml
     set apk_path=/data/adb/modules/%dir_app_name%/system/priv-app/%dir_app_name%
     set permissions_path=/data/adb/modules/%dir_app_name%/system/etc/permissions
+) else if "%device_model%"=="Android SDK built for x86_64" (
+     :: Set paths for Android SDK built for x86_64 device
+     set permissions_xml_host=app\src\main\java\com\mipo\mipsos\emulator\privapp-permissions-platform.xml
+     set permissions_xml_name=privapp-permissions-platform.xml
+     set apk_path=/data/adb/modules/%dir_app_name%/system/priv-app/%dir_app_name%
+     set permissions_path=/data/adb/modules/%dir_app_name%/system/etc/permissions
 ) else (
-    :: Stop script for unsupported devices to prevent potential issues
-    echo Unsupported device model: %device_model%
-    echo Script will stop to prevent potential issues.
-    pause
-    exit /b 1
+     :: Stop script for unsupported devices to prevent potential issues
+     echo Unsupported device model: %device_model%
+     echo Script will stop to prevent potential issues.
+     pause
+     exit /b 1
 )
 
 :: Set ADB shell command with superuser permissions
@@ -98,6 +104,12 @@ echo Setting permissions...
 %ADB_SH% "chmod 755 %permissions_path%"
 %ADB_SH% "chmod 644 %permissions_path%/%permissions_xml_name%"
 %ADB_SH% "chmod 644 /data/adb/modules/%dir_app_name%/module.prop"
+
+:: Conditional block to change permissions of tty files only for mipo_M59
+if "%device_model%"=="mipo_M59" (
+    echo Changing permissions of tty files...
+    %ADB_SH% "chmod 666 /dev/ttyC0"
+)
 
 :: Enable the Magisk module
 echo Enabling module...

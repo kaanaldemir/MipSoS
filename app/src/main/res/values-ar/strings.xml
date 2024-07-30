@@ -47,8 +47,6 @@
     <string name="stop">إيقاف</string>
     <string name="recording_saved">تم حفظ التسجيل</string>
     <string name="recording_file_not_found">خطأ: لم يتم العثور على ملف التسجيل</string>
-    <string name="stop_playback">إيقاف التشغيل</string>
-    <string name="play_recording">تشغيل التسجيل</string>
     <string name="signal_strength">قوة الإشارة: %d</string>
     <string name="telephony_manager_null">TelephonyManager غير متوفر</string>
     <string name="permission_not_granted">لم يتم منح الإذن</string>
@@ -84,4 +82,15 @@
     <string name="night_mode">الليل</string>
     <string name="day_mode">النهار</string>
     <string name="follow_system_mode">اتبع النظام</string>
+    <string name="use_provided_sound" />
+    <string name="playback_intervals">الفترة</string>
+    <string name="play_whistle">صفارة</string>
+    <string name="interval_5_seconds">5 ثواني</string>
+    <string name="interval_10_seconds">10 ثواني</string>
+    <string name="interval_15_seconds">15 ثانية</string>
+    <string name="select_interval">اختر الفترة</string>
+    <string name="cancel_interval">إلغاء</string>
+    <string name="stop_playback">إيقاف</string>
+    <string name="play_recording">تشغيل</string>
+
 </resources>

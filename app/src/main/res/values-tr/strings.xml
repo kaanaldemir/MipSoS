@@ -47,8 +47,6 @@
     <string name="stop">Durdur</string>
     <string name="recording_saved">Kayıt kaydedildi</string>
     <string name="recording_file_not_found">Hata: Kayıt dosyası bulunamadı</string>
-    <string name="stop_playback">Oynatmayı Durdur</string>
-    <string name="play_recording">Kaydı Oynat</string>
     <string name="signal_strength">Sinyal Gücü: %d</string>
     <string name="telephony_manager_null">TelephonyManager boş</string>
     <string name="permission_not_granted">İzin verilmedi</string>
@@ -84,4 +82,14 @@
     <string name="night_mode">Gece</string>
     <string name="day_mode">Gündüz</string>
     <string name="follow_system_mode">Sistemi Takip Et</string>
+    <string name="use_provided_sound" />
+    <string name="playback_intervals">Aralık Seç</string>
+    <string name="play_whistle">Düdük</string>
+    <string name="interval_5_seconds">5 saniye</string>
+    <string name="interval_10_seconds">10 saniye</string>
+    <string name="interval_15_seconds">15 saniye</string>
+    <string name="select_interval">Aralık Seç</string>
+    <string name="cancel_interval">İptal</string>
+    <string name="stop_playback">Durdur</string>
+    <string name="play_recording">Oynat</string>
 </resources>
