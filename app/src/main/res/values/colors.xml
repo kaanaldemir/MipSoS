@@ -6,4 +6,5 @@
     <color name="background_color">#C8C8C8</color> <!-- Light background color -->
     <color name="primary_text_color">#212121</color> <!-- Dark text for readability -->
     <color name="secondary_text_color">#757575</color> <!-- Slightly lighter dark text -->
+    <color name="icon_color">#FFE57F</color>
 </resources>

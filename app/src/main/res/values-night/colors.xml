@@ -5,4 +5,6 @@
     <color name="tertiary_color">#9A0007</color>
     <color name="background_color">#121212</color>
     <color name="primary_text_color">#BDBDBD</color>
-    <color name="secondary_text_color">#BDBDBD</color>  </resources>
+    <color name="secondary_text_color">#BDBDBD</color>
+    <color name="icon_color">#EA80FC</color>
+</resources>

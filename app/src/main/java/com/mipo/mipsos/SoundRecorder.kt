@@ -10,6 +10,7 @@ import android.util.Log
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import java.io.File
 import java.io.IOException
 
@@ -27,6 +28,10 @@ class SoundRecorder(
     private var handler: Handler? = null
     private var intervalRunnable: Runnable? = null
     private var hasRecordedInSession = false
+    private var countdownHandler: Handler? = null
+    private var countdownRunnable: Runnable? = null
+    private var remainingTime: Long = 0
+    private var isCountingDown = false
 
     fun startRecording() {
         if (mediaRecorder == null) {
@@ -79,9 +84,8 @@ class SoundRecorder(
     }
 
     fun handlePlayback(useProvidedSound: Boolean, intervalPlayback: Boolean, interval: Long) {
-        if (isPlaying) {
-            mediaPlayer?.stop()
-            resetMediaPlayer(useProvidedSound)
+        if (isPlaying || isCountingDown) {
+            stopPlayback()
         } else {
             if (useProvidedSound) {
                 playProvidedSound(intervalPlayback, interval)
@@ -98,13 +102,14 @@ class SoundRecorder(
                 setOnCompletionListener {
                     resetMediaPlayer(false)
                     if (intervalPlayback) {
-                        scheduleNextPlayback(interval)
+                        startIntervalCountdown(interval)
                     }
                 }
                 prepare()
                 start()
             }
             playbackButton.text = context.getString(R.string.stop_playback)
+            playbackButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_cancel, 0, 0, 0)
             isPlaying = true
         }
     }
@@ -115,21 +120,54 @@ class SoundRecorder(
             setOnCompletionListener {
                 resetMediaPlayer(true)
                 if (intervalPlayback) {
-                    scheduleNextPlayback(interval)
+                    startIntervalCountdown(interval)
                 }
             }
             start()
         }
         playbackButton.text = context.getString(R.string.stop_playback)
+        playbackButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_cancel, 0, 0, 0)
         isPlaying = true
     }
 
-    private fun scheduleNextPlayback(interval: Long) {
-        handler = Handler()
-        intervalRunnable = Runnable {
-            handlePlayback(true, true, interval)
+    private fun startIntervalCountdown(interval: Long) {
+        remainingTime = interval / 1000 // convert to seconds
+        updateCountdownText()
+        countdownHandler = Handler()
+        isCountingDown = true
+        countdownRunnable = object : Runnable {
+            override fun run() {
+                if (remainingTime > 0) {
+                    remainingTime--
+                    updateCountdownText()
+                    countdownHandler?.postDelayed(this, 1000)
+                } else {
+                    isCountingDown = false
+                    handlePlayback(true, true, interval) // Start playback after countdown
+                }
+            }
         }
-        handler?.postDelayed(intervalRunnable!!, interval)
+        countdownHandler?.post(countdownRunnable!!)
+    }
+
+    private fun stopPlayback() {
+        if (isPlaying) {
+            mediaPlayer?.stop()
+            resetMediaPlayer(false)
+        }
+        if (isCountingDown) {
+            countdownHandler?.removeCallbacks(countdownRunnable!!)
+            countdownHandler = null
+            countdownRunnable = null
+            remainingTime = 0
+            isCountingDown = false
+            resetMediaPlayer(false)
+        }
+    }
+
+    private fun updateCountdownText() {
+        playbackButton.text = context.getString(R.string.countdown, remainingTime)
+        playbackButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_cancel, 0, 0, 0)
     }
 
     private fun resetMediaPlayer(useProvidedSound: Boolean) {
@@ -138,9 +176,7 @@ class SoundRecorder(
         mediaPlayer = null
         isPlaying = false
         playbackButton.text = if (useProvidedSound) context.getString(R.string.play_whistle) else context.getString(R.string.play_recording)
-        handler?.removeCallbacks(intervalRunnable!!)
-        handler = null
-        intervalRunnable = null
+        playbackButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_play, 0, 0, 0)
     }
 
     fun resetPlayer() {

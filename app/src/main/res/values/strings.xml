@@ -85,11 +85,13 @@
     <string name="use_provided_sound" />
     <string name="playback_intervals">Interval</string>
     <string name="play_whistle">Whistle</string>
-    <string name="interval_5_seconds">5 seconds</string>
-    <string name="interval_10_seconds">10 seconds</string>
-    <string name="interval_15_seconds">15 seconds</string>
+    <string name="interval_15_seconds">15 Seconds</string>
+    <string name="interval_1_minutes">1 Minutes</string>
+    <string name="interval_10_minutes">10 Minutes</string>
     <string name="select_interval">Select Interval</string>
     <string name="cancel_interval">Cancel</string>
     <string name="stop_playback">Stop</string>
     <string name="play_recording">Play</string>
+    <string name="countdown">%d</string>
+
 </resources>

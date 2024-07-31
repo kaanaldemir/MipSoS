@@ -85,11 +85,12 @@
     <string name="use_provided_sound" />
     <string name="playback_intervals">Aralık Seç</string>
     <string name="play_whistle">Düdük</string>
-    <string name="interval_5_seconds">5 saniye</string>
-    <string name="interval_10_seconds">10 saniye</string>
-    <string name="interval_15_seconds">15 saniye</string>
+    <string name="interval_15_seconds">15 Seconds</string>
+    <string name="interval_1_minutes">1 Minutes</string>
+    <string name="interval_10_minutes">10 Minutes</string>
     <string name="select_interval">Aralık Seç</string>
     <string name="cancel_interval">İptal</string>
     <string name="stop_playback">Durdur</string>
     <string name="play_recording">Oynat</string>
+    <string name="countdown">%d</string>
 </resources>

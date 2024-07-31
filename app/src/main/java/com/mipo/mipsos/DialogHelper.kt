@@ -115,11 +115,11 @@ class DialogHelper(private val context: Context) {
 
     fun showIntervalSelectionDialog(onIntervalSelected: (Long) -> Unit) {
         val intervals = arrayOf(
-            context.getString(R.string.interval_5_seconds),
-            context.getString(R.string.interval_10_seconds),
-            context.getString(R.string.interval_15_seconds)
+            context.getString(R.string.interval_15_seconds),
+            context.getString(R.string.interval_1_minutes),
+            context.getString(R.string.interval_10_minutes)
         )
-        val intervalValues = arrayOf(5000L, 10000L, 15000L)
+        val intervalValues = arrayOf(15000L, 60000L, 600000L)
 
         val builder = AlertDialog.Builder(context)
         builder.setTitle(context.getString(R.string.select_interval))

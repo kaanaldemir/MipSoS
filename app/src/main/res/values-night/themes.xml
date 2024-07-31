@@ -7,6 +7,7 @@
         <item name="colorPrimaryVariant">@color/secondary_color</item>
         <item name="colorSecondary">@color/secondary_color</item>
         <item name="colorOnSecondary">@color/primary_text_color</item>
+        <item name="iconColor">@color/icon_color</item>
     </style>
 
     <style name="Theme.MipSoS.NoActionBar">

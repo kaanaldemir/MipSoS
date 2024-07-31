@@ -84,6 +84,9 @@ class MainActivity : AppCompatActivity() {
         soundSourceSwitch = findViewById(R.id.soundSourceSwitch)
         playbackIntervalCheckbox = findViewById(R.id.playbackIntervalCheckbox)
 
+        // Set initial icon for playbackButton
+        playbackButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_play, 0, 0, 0)
+
         // Initialize other helpers
         locationHelper = LocationHelper(this, locationTextView)
         soundRecorder = SoundRecorder(this, recordingStatusTextView, recordButton, playbackButton)
@@ -105,6 +108,7 @@ class MainActivity : AppCompatActivity() {
         soundSourceSwitch.setOnCheckedChangeListener { _, isChecked ->
             playbackButton.isEnabled = isChecked || soundRecorder.hasRecorded()
             playbackButton.text = if (isChecked) getString(R.string.play_whistle) else getString(R.string.play_recording)
+            playbackButton.setCompoundDrawablesWithIntrinsicBounds(if (isChecked) R.drawable.ic_play else R.drawable.ic_play, 0, 0, 0)
 
             // Disable the playback button if switching back to recording and no recording exists
             if (!isChecked && !soundRecorder.hasRecorded()) {
