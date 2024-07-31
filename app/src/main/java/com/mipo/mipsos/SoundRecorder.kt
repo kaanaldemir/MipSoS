@@ -2,10 +2,11 @@ package com.mipo.mipsos
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.media.MediaPlayer
 import android.media.MediaRecorder
-import android.os.Handler
 import android.os.Environment
+import android.os.Handler
 import android.util.Log
 import android.widget.Button
 import android.widget.TextView
@@ -32,6 +33,7 @@ class SoundRecorder(
     private var countdownRunnable: Runnable? = null
     private var remainingTime: Long = 0
     private var isCountingDown = false
+    private var interval: Long = 0L
 
     fun startRecording() {
         if (mediaRecorder == null) {
@@ -84,53 +86,64 @@ class SoundRecorder(
     }
 
     fun handlePlayback(useProvidedSound: Boolean, intervalPlayback: Boolean, interval: Long) {
+        this.interval = interval
         if (isPlaying || isCountingDown) {
             stopPlayback()
         } else {
-            if (useProvidedSound) {
-                playProvidedSound(intervalPlayback, interval)
+            if (intervalPlayback) {
+                startForegroundService(useProvidedSound)
             } else {
-                playRecordedSound(intervalPlayback, interval)
+                playSound(useProvidedSound)
             }
         }
     }
 
-    private fun playRecordedSound(intervalPlayback: Boolean, interval: Long) {
-        recordingFilePath?.let { filePath ->
-            mediaPlayer = MediaPlayer().apply {
-                setDataSource(filePath)
-                setOnCompletionListener {
-                    resetMediaPlayer(false)
-                    if (intervalPlayback) {
-                        startIntervalCountdown(interval)
-                    }
+    private fun startForegroundService(useProvidedSound: Boolean) {
+        val intent = Intent(context, SoundPlaybackService::class.java).apply {
+            action = SoundPlaybackService.ACTION_START
+            putExtra(SoundPlaybackService.EXTRA_INTERVAL, interval)
+            putExtra(SoundPlaybackService.EXTRA_USE_PROVIDED_SOUND, useProvidedSound)
+        }
+        ContextCompat.startForegroundService(context, intent)
+        startIntervalCountdown()
+    }
+
+    private fun stopForegroundService() {
+        val intent = Intent(context, SoundPlaybackService::class.java).apply {
+            action = SoundPlaybackService.ACTION_STOP
+        }
+        context.startService(intent)
+        stopIntervalCountdown()
+    }
+
+    private fun playSound(useProvidedSound: Boolean) {
+        if (useProvidedSound) {
+            mediaPlayer = MediaPlayer.create(context, R.raw.provided_sound)
+        } else {
+            recordingFilePath?.let { filePath ->
+                mediaPlayer = MediaPlayer().apply {
+                    setDataSource(filePath)
+                    prepare()
                 }
-                prepare()
-                start()
             }
-            playbackButton.text = context.getString(R.string.stop_playback)
-            playbackButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_cancel, 0, 0, 0)
-            isPlaying = true
         }
-    }
 
-    private fun playProvidedSound(intervalPlayback: Boolean, interval: Long) {
-        mediaPlayer = MediaPlayer.create(context, R.raw.provided_sound) // Ensure provided_sound.mp3 is in res/raw
         mediaPlayer?.apply {
             setOnCompletionListener {
-                resetMediaPlayer(true)
-                if (intervalPlayback) {
-                    startIntervalCountdown(interval)
+                if (interval > 0) {
+                    startIntervalCountdown()
                 }
+                resetMediaPlayer(useProvidedSound)
             }
             start()
         }
+
         playbackButton.text = context.getString(R.string.stop_playback)
         playbackButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_cancel, 0, 0, 0)
         isPlaying = true
     }
 
-    private fun startIntervalCountdown(interval: Long) {
+    private fun startIntervalCountdown() {
         remainingTime = interval / 1000 // convert to seconds
         updateCountdownText()
         countdownHandler = Handler()
@@ -143,7 +156,7 @@ class SoundRecorder(
                     countdownHandler?.postDelayed(this, 1000)
                 } else {
                     isCountingDown = false
-                    handlePlayback(true, true, interval) // Start playback after countdown
+                    playSound(true) // Start playback after countdown
                 }
             }
         }
@@ -156,13 +169,19 @@ class SoundRecorder(
             resetMediaPlayer(false)
         }
         if (isCountingDown) {
-            countdownHandler?.removeCallbacks(countdownRunnable!!)
-            countdownHandler = null
-            countdownRunnable = null
-            remainingTime = 0
-            isCountingDown = false
+            stopIntervalCountdown()
             resetMediaPlayer(false)
         }
+        stopForegroundService()
+        enableSwitchAndCheckbox()
+    }
+
+    private fun stopIntervalCountdown() {
+        countdownHandler?.removeCallbacks(countdownRunnable!!)
+        countdownHandler = null
+        countdownRunnable = null
+        remainingTime = 0
+        isCountingDown = false
     }
 
     private fun updateCountdownText() {
@@ -177,6 +196,13 @@ class SoundRecorder(
         isPlaying = false
         playbackButton.text = if (useProvidedSound) context.getString(R.string.play_whistle) else context.getString(R.string.play_recording)
         playbackButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_play, 0, 0, 0)
+    }
+
+    private fun enableSwitchAndCheckbox() {
+        (context as MainActivity).runOnUiThread {
+            context.soundSourceSwitch.isEnabled = true
+            context.playbackIntervalCheckbox.isEnabled = true
+        }
     }
 
     fun resetPlayer() {

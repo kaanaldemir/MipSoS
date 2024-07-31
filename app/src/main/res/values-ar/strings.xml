@@ -85,9 +85,9 @@
     <string name="use_provided_sound" />
     <string name="playback_intervals">الفترة</string>
     <string name="play_whistle">صفارة</string>
-    <string name="interval_15_seconds">15 Seconds</string>
-    <string name="interval_1_minutes">1 Minutes</string>
-    <string name="interval_10_minutes">10 Minutes</string>
+    <string name="interval_15_seconds">15 ثانية</string>
+    <string name="interval_1_minutes">1 دقيقة</string>
+    <string name="interval_10_minutes">10 دقائق</string>
     <string name="select_interval">اختر الفترة</string>
     <string name="cancel_interval">إلغاء</string>
     <string name="stop_playback">إيقاف</string>
