@@ -144,7 +144,11 @@
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:text="@string/use_provided_sound"
-                    android:textColor="@color/primary_text_color" />
+                    android:textColor="@color/primary_text_color"
+                    android:track="@drawable/whistle_track"
+                    android:thumb="@drawable/thumb_selector" />
+
+
 
                 <LinearLayout
                     android:layout_width="0dp"
