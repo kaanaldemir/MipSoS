@@ -12,7 +12,7 @@
         android:layout_height="40dp"
         app:switchBkgLeftColor="@color/black"
         app:switchBkgMiddleColor="@color/black_white_mode"
-        app:switchBkgRightColor="@color/white"
+        app:switchBkgRightColor="@color/ic_launcher_background_end"
         app:switchToggleLeftColor="@color/white"
         app:switchToggleMiddleColor="@color/white_black_mode"
         app:switchToggleRightColor="@color/black"

@@ -432,10 +432,10 @@ class MainActivity : AppCompatActivity() {
     private fun restartApp(delayInMilliseconds: Long = 0, beforeRestart: () -> Unit = {}) {
         val handler = Handler(Looper.getMainLooper())
         handler.postDelayed({
-            beforeRestart()
             val intent = Intent(this, SplashActivity::class.java)
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
             startActivity(intent)
+            beforeRestart()
             finish()
         }, delayInMilliseconds)
     }

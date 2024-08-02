@@ -8,6 +8,7 @@
     <color name="secondary_text_color">#757575</color> <!-- Slightly lighter dark text -->
     <color name="icon_color">#FFE57F</color>
     <color name="ic_launcher_background">#FFCDD2</color>
+    <color name="ic_launcher_background_end">#FFECEC</color>
     <color name="black_white_mode">#FFFFFF</color>
     <color name="white_black_mode">#000000</color>
 
