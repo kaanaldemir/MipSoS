@@ -4,6 +4,8 @@ import android.Manifest
 import android.content.Intent
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.os.Handler
+import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
@@ -18,6 +20,7 @@ import androidx.appcompat.widget.AppCompatImageButton
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.material.button.MaterialButton
+import com.rm.rmswitch.RMTristateSwitch
 import java.io.File
 import java.util.*
 
@@ -37,7 +40,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var apnSettingsButton: Button
     private lateinit var autoSendCheckbox: CheckBox
     private lateinit var languageSwitchButton: AppCompatImageButton
-    private lateinit var themeModeButton: AppCompatImageButton
+    private lateinit var themeModeButton: RMTristateSwitch // Changed from AppCompatImageButton to RMTristateSwitch
     internal lateinit var soundSourceSwitch: Switch
     internal lateinit var playbackIntervalCheckbox: CheckBox
 
@@ -79,7 +82,7 @@ class MainActivity : AppCompatActivity() {
         apnSettingsButton = findViewById(R.id.apnSettingsButton)
         autoSendCheckbox = findViewById(R.id.autoSendCheckbox)
         languageSwitchButton = findViewById(R.id.languageSwitchButton)
-        themeModeButton = findViewById(R.id.themeModeButton)
+        themeModeButton = findViewById(R.id.themeModeButton) // Changed from findViewById(R.id.themeModeButton)
         soundSourceSwitch = findViewById(R.id.soundSourceSwitch)
         playbackIntervalCheckbox = findViewById(R.id.playbackIntervalCheckbox)
 
@@ -181,14 +184,28 @@ class MainActivity : AppCompatActivity() {
             )
         }
 
-        themeModeButton.setOnClickListener {
-            dialogHelper.showThemeModeDialog(
-                sharedPrefHelper,
-                { mode ->
-                    AppCompatDelegate.setDefaultNightMode(mode)
-                    restartApp()
-                }
-            )
+        // Configure the RMTristateSwitch for theme mode selection
+        themeModeButton.setSwitchToggleLeftDrawableRes(R.drawable.theme_night)
+        themeModeButton.setSwitchToggleMiddleDrawableRes(R.drawable.theme_auto)
+        themeModeButton.setSwitchToggleRightDrawable(ContextCompat.getDrawable(this, R.drawable.theme_day))
+
+        // Load the saved theme mode and set the initial state of the switch
+        val currentMode = sharedPrefHelper.getThemeMode()
+        themeModeButton.state = when (currentMode) {
+            AppCompatDelegate.MODE_NIGHT_NO -> RMTristateSwitch.STATE_RIGHT
+            AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM -> RMTristateSwitch.STATE_MIDDLE
+            else -> RMTristateSwitch.STATE_LEFT
+        }
+
+        themeModeButton.addSwitchObserver { switchView, state ->
+            val selectedMode = when (state) {
+                RMTristateSwitch.STATE_LEFT -> AppCompatDelegate.MODE_NIGHT_YES
+                RMTristateSwitch.STATE_MIDDLE -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+                RMTristateSwitch.STATE_RIGHT -> AppCompatDelegate.MODE_NIGHT_NO
+                else -> AppCompatDelegate.MODE_NIGHT_YES
+            }
+            sharedPrefHelper.saveThemeMode(selectedMode)
+            restartApp(300) { AppCompatDelegate.setDefaultNightMode(selectedMode) }
         }
 
         // Load user-edited message
@@ -412,10 +429,17 @@ class MainActivity : AppCompatActivity() {
         sharedPrefHelper.saveLanguage(lang)
     }
 
-    private fun restartApp() {
-        val intent = Intent(this, SplashActivity::class.java)
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-        startActivity(intent)
-        finish()
+    private fun restartApp(delayInMilliseconds: Long = 0, beforeRestart: () -> Unit = {}) {
+        val handler = Handler(Looper.getMainLooper())
+        handler.postDelayed({
+            beforeRestart()
+            val intent = Intent(this, SplashActivity::class.java)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+            startActivity(intent)
+            finish()
+        }, delayInMilliseconds)
     }
+
+
+
 }

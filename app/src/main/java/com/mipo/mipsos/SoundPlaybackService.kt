@@ -3,6 +3,7 @@ package com.mipo.mipsos
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
@@ -35,7 +36,7 @@ class SoundPlaybackService : Service() {
     override fun onCreate() {
         super.onCreate()
         createNotificationChannel()
-        startForeground(1, createNotification("Playing sound at intervals"))
+        startForeground(1, createNotification(getString(R.string.notification_content_text)))
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -83,7 +84,7 @@ class SoundPlaybackService : Service() {
     private fun createNotificationChannel() {
         val serviceChannel = NotificationChannel(
             CHANNEL_ID,
-            "Sound Playback Service Channel",
+            getString(R.string.notification_channel_name),
             NotificationManager.IMPORTANCE_DEFAULT
         )
         val manager = getSystemService(NotificationManager::class.java)
@@ -91,10 +92,17 @@ class SoundPlaybackService : Service() {
     }
 
     private fun createNotification(contentText: String): Notification {
+        val stopIntent = Intent(this, SoundPlaybackService::class.java).apply {
+            action = ACTION_STOP
+        }
+        val stopPendingIntent: PendingIntent =
+            PendingIntent.getService(this, 0, stopIntent, PendingIntent.FLAG_IMMUTABLE)
+
         return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("Sound Playback")
+            .setContentTitle(getString(R.string.notification_content_title))
             .setContentText(contentText)
             .setSmallIcon(R.drawable.ic_play)
+            .addAction(R.drawable.ic_stop, getString(R.string.stop_button_text), stopPendingIntent)
             .build()
     }
 

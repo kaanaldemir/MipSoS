@@ -93,5 +93,8 @@
     <string name="stop_playback">Stop</string>
     <string name="play_recording">Play</string>
     <string name="countdown">%d</string>
-
+    <string name="notification_channel_name">Sound Playback Service Channel</string>
+    <string name="notification_content_title">Sound Playback</string>
+    <string name="notification_content_text">Playing sound at intervals</string>
+    <string name="stop_button_text">Stop</string>
 </resources>

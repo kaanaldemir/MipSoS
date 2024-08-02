@@ -93,4 +93,8 @@
     <string name="stop_playback">إيقاف</string>
     <string name="play_recording">تشغيل</string>
     <string name="countdown">%d</string>
+    <string name="notification_channel_name">قناة خدمة تشغيل الصوت</string>
+    <string name="notification_content_title">تشغيل الصوت</string>
+    <string name="notification_content_text">تشغيل الصوت على فترات</string>
+    <string name="stop_button_text">إيقاف</string>
 </resources>

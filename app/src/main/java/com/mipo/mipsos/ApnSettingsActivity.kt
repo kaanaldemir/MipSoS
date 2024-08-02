@@ -29,6 +29,7 @@ class ApnSettingsActivity : AppCompatActivity() {
         recyclerView.adapter = adapter
 
         loadApns()
+        startMediatekNetworkScan()
     }
 
     private fun loadApns() {
@@ -52,102 +53,66 @@ class ApnSettingsActivity : AppCompatActivity() {
                 apnList.add(Apn(id, name, apn))
             }
 
-            getSignalStrength()
             adapter.notifyDataSetChanged()
         }
     }
 
-    private fun getSignalStrength() {
-        val telephonyManager = getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // Permission is not granted
-            Log.d("APNApp", "Permission not granted")
-            return
-        }
 
-        val cellInfoList = telephonyManager.allCellInfo
-        Log.d("APNApp", "Cell Info List Size: ${cellInfoList.size}")
 
-        val signalStrengthMap = mutableMapOf<String, MutableList<Int>>()
 
-        for (cellInfo in cellInfoList) {
-            when (cellInfo) {
-                is CellInfoLte -> {
-                    val cellSignalStrengthLte = cellInfo.cellSignalStrength
-                    val networkName = cellInfo.cellIdentity.operatorAlphaLong?.toString() ?: "Unknown"
-                    val mcc = cellInfo.cellIdentity.mccString?.toIntOrNull()
-                    val mnc = cellInfo.cellIdentity.mncString?.toIntOrNull()
-                    val providerKey = getProviderKey(mcc, mnc, networkName)
-                    Log.d("APNApp", "LTE Signal Strength: ${cellSignalStrengthLte.dbm} for $providerKey")
-                    Log.d("APNApp", "Cell Identity LTE: ${cellInfo.cellIdentity}")
-                    signalStrengthMap.getOrPut(providerKey) { mutableListOf() }.add(cellSignalStrengthLte.dbm)
+    private fun startMediatekNetworkScan() {
+        val telephonyManagerExClass = Class.forName("com.mediatek.telephony.TelephonyManagerEx")
+        val getDefaultMethod = telephonyManagerExClass.getDeclaredMethod("getDefault")
+        val telephonyManagerExInstance = getDefaultMethod.invoke(null)
+
+        val scanType = 1 // NetworkScanRequest.SCAN_TYPE_ONE_SHOT
+        val radioAccessSpecifier = arrayOf(
+            RadioAccessSpecifier(
+                AccessNetworkConstants.AccessNetworkType.GERAN,
+                intArrayOf(900, 1800), // Specify bands for GERAN (GSM)
+                null // channels (null means scan all)
+            ),
+            RadioAccessSpecifier(
+                AccessNetworkConstants.AccessNetworkType.UTRAN,
+                intArrayOf(2100), // Specify bands for UTRAN (UMTS)
+                null // channels
+            ),
+            RadioAccessSpecifier(
+                AccessNetworkConstants.AccessNetworkType.EUTRAN,
+                intArrayOf(1800, 2600), // Specify bands for EUTRAN (LTE)
+                null // channels
+            )
+        )
+        val searchTime = 60
+        val incrementalResults = true
+        val incrementalResultsPeriodicity = 5
+        val plmnIds = arrayListOf("28601", "28602", "28603") // Turkcell, Vodafone Türkiye, Türk Telekom
+
+        val networkScanRequest = NetworkScanRequest(scanType, radioAccessSpecifier, 5, searchTime, incrementalResults, incrementalResultsPeriodicity, plmnIds)
+
+        val requestNetworkScanMethod = telephonyManagerExClass.getDeclaredMethod("requestNetworkScan", NetworkScanRequest::class.java, TelephonyScanManager.NetworkScanCallback::class.java)
+        requestNetworkScanMethod.isAccessible = true
+
+        val networkScanCallback = object : TelephonyScanManager.NetworkScanCallback() {
+            override fun onResults(results: List<CellInfo>) {
+                super.onResults(results)
+                Log.d("APNApp", "Network scan results: ${results.size}")
+                results.forEach { cellInfo ->
+                    Log.d("APNApp", cellInfo.toString())
                 }
-                is CellInfoGsm -> {
-                    val cellSignalStrengthGsm = cellInfo.cellSignalStrength
-                    val networkName = cellInfo.cellIdentity.operatorAlphaLong?.toString() ?: "Unknown"
-                    val mcc = cellInfo.cellIdentity.mccString?.toIntOrNull()
-                    val mnc = cellInfo.cellIdentity.mncString?.toIntOrNull()
-                    val providerKey = getProviderKey(mcc, mnc, networkName)
-                    Log.d("APNApp", "GSM Signal Strength: ${cellSignalStrengthGsm.dbm} for $providerKey")
-                    Log.d("APNApp", "Cell Identity GSM: ${cellInfo.cellIdentity}")
-                    signalStrengthMap.getOrPut(providerKey) { mutableListOf() }.add(cellSignalStrengthGsm.dbm)
-                }
-                is CellInfoCdma -> {
-                    val cellSignalStrengthCdma = cellInfo.cellSignalStrength
-                    val networkName = cellInfo.cellIdentity.operatorAlphaLong?.toString() ?: "Unknown"
-                    val providerKey = getProviderKey(null, null, networkName)
-                    Log.d("APNApp", "CDMA Signal Strength: ${cellSignalStrengthCdma.dbm} for $providerKey")
-                    Log.d("APNApp", "Cell Identity CDMA: ${cellInfo.cellIdentity}")
-                    signalStrengthMap.getOrPut(providerKey) { mutableListOf() }.add(cellSignalStrengthCdma.dbm)
-                }
-                is CellInfoWcdma -> {
-                    val cellSignalStrengthWcdma = cellInfo.cellSignalStrength
-                    val networkName = cellInfo.cellIdentity.operatorAlphaLong?.toString() ?: "Unknown"
-                    val mcc = cellInfo.cellIdentity.mccString?.toIntOrNull()
-                    val mnc = cellInfo.cellIdentity.mncString?.toIntOrNull()
-                    val providerKey = getProviderKey(mcc, mnc, networkName)
-                    Log.d("APNApp", "WCDMA Signal Strength: ${cellSignalStrengthWcdma.dbm} for $providerKey")
-                    Log.d("APNApp", "Cell Identity WCDMA: ${cellInfo.cellIdentity} for $providerKey")
-                    signalStrengthMap.getOrPut(providerKey) { mutableListOf() }.add(cellSignalStrengthWcdma.dbm)
-                }
-                else -> {
-                    Log.d("APNApp", "Unknown cell info type: ${cellInfo.javaClass}")
-                }
+            }
+
+            override fun onComplete() {
+                super.onComplete()
+                Log.d("APNApp", "Network scan complete")
+            }
+
+            override fun onError(error: Int) {
+                super.onError(error)
+                Log.e("APNApp", "Network scan error: $error")
             }
         }
 
-        // Assign signal strength to APNs based on the provider key
-        for (apn in apnList) {
-            val providerKey = getProviderKeyForApn(apn.name)
-            val signalStrengths = signalStrengthMap[providerKey]
-            if (signalStrengths != null && signalStrengths.isNotEmpty()) {
-                apn.signalStrength = signalStrengths.average().toInt()
-            } else {
-                apn.signalStrength = -120 // Default value for no signal
-            }
-            if (apn.signalStrength != -120) {
-                Log.d("APNApp", "APN: ${apn.name} assigned signal strength: ${apn.signalStrength}")
-            }
-        }
-
-        apnList.sortByDescending { it.signalStrength }
-    }
-
-    private fun getProviderKey(mcc: Int?, mnc: Int?, networkName: String): String {
-        return when {
-            mcc == 286 && mnc == 1 -> "Turkcell"
-            mcc == 286 && mnc == 2 -> "Vodafone Türkiye"
-            mcc == 286 && mnc == 3 -> "Türk Telekom"
-            else -> networkName
-        }
-    }
-
-    private fun getProviderKeyForApn(apnName: String): String {
-        return when {
-            apnName.contains("Turkcell", ignoreCase = true) -> "Turkcell"
-            apnName.contains("Vodafone", ignoreCase = true) -> "Vodafone Türkiye"
-            apnName.contains("Türk Telekom", ignoreCase = true) -> "Türk Telekom"
-            else -> "Unknown"
-        }
+        requestNetworkScanMethod.invoke(telephonyManagerExInstance, networkScanRequest, networkScanCallback)
     }
 }

@@ -93,4 +93,8 @@
     <string name="stop_playback">Durdur</string>
     <string name="play_recording">Oynat</string>
     <string name="countdown">%d</string>
+    <string name="notification_channel_name">Ses Çalma Servis Kanalı</string>
+    <string name="notification_content_title">Ses Çalma</string>
+    <string name="notification_content_text">Aralıklarla ses çalma</string>
+    <string name="stop_button_text">Durdur</string>
 </resources>

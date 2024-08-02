@@ -157,8 +157,8 @@ class DialogHelper(private val context: Context) {
         sharedPrefHelper: SharedPrefHelper,
         onRestart: () -> Unit
     ) {
-        val languages = arrayOf("English", "Türkçe", "العربية")
-        val languageCodes = arrayOf("en", "tr", "ar")
+        val languages = arrayOf("English", "Türkçe", "العربية", "Pусский")
+        val languageCodes = arrayOf("en", "tr", "ar", "ru")
         val currentLangCode = sharedPrefHelper.getLanguage()
         val currentLangIndex = languageCodes.indexOf(currentLangCode)
 
@@ -169,6 +169,7 @@ class DialogHelper(private val context: Context) {
                 val defaultMessageEn = "Emergency! Please send help to my location."
                 val defaultMessageTr = "Acil Durum! Lütfen konumuma yardım gönderin."
                 val defaultMessageAr = "حالة طوارئ! يرجى إرسال المساعدة إلى موقعي."
+                val defaultMessageRu = "Чрезвычайная ситуация! Пожалуйста, отправьте помощь на мое местоположение."
 
                 val currentMessage = messageEditText.text.toString()
                 if (currentMessage == defaultMessageEn || currentMessage == defaultMessageTr || currentMessage == defaultMessageAr || currentMessage.isEmpty()) {
@@ -176,6 +177,7 @@ class DialogHelper(private val context: Context) {
                         "en" -> defaultMessageEn
                         "tr" -> defaultMessageTr
                         "ar" -> defaultMessageAr
+                        "ru" -> defaultMessageRu
                         else -> defaultMessageEn
                     }
                     messageEditText.setText(newDefaultMessage)

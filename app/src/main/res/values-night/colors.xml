@@ -7,4 +7,7 @@
     <color name="primary_text_color">#BDBDBD</color>
     <color name="secondary_text_color">#BDBDBD</color>
     <color name="icon_color">#EA80FC</color>
+    <color name="ic_launcher_background">#52181D</color>
+    <color name="black_white_mode">#000000</color>
+    <color name="white_black_mode">#FFFFFF</color>
 </resources>

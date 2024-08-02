@@ -6,19 +6,24 @@
     android:background="@drawable/gradient_background">
 
 
-    <ImageButton
+    <com.rm.rmswitch.RMTristateSwitch
         android:id="@+id/themeModeButton"
-        android:layout_width="36dp"
-        android:layout_height="45dp"
+        android:layout_width="86dp"
+        android:layout_height="40dp"
+        app:switchBkgLeftColor="@color/black"
+        app:switchBkgMiddleColor="@color/black_white_mode"
+        app:switchBkgRightColor="@color/white"
+        app:switchToggleLeftColor="@color/white"
+        app:switchToggleMiddleColor="@color/white_black_mode"
+        app:switchToggleRightColor="@color/black"
         android:layout_above="@+id/cardView"
         android:layout_below="@+id/appIcon"
         android:layout_alignStart="@+id/cardView"
         android:layout_marginStart="2dp"
         android:layout_marginTop="-26dp"
         android:layout_marginEnd="98dp"
-        android:layout_marginBottom="-5dp"
-        android:layout_toEndOf="@+id/appIcon"
-        android:background="@drawable/ic_day_night_mode_button" />
+        android:layout_marginBottom="-10dp"
+        android:layout_toEndOf="@+id/appIcon" />
 
     <ImageButton
         android:id="@+id/languageSwitchButton"
@@ -139,14 +144,6 @@
                     android:textSize="18sp"
                     android:textColor="@color/primary_text_color" />
 
-                <Switch
-                    android:id="@+id/soundSourceSwitch"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:text="@string/use_provided_sound"
-                    android:textColor="@color/primary_text_color"
-                    android:track="@drawable/whistle_track"
-                    android:thumb="@drawable/thumb_selector" />
 
 
 
@@ -156,6 +153,16 @@
                     android:layout_weight="1"
                     android:orientation="horizontal"
                     android:gravity="end|center_vertical">
+
+                    <Switch
+                        android:id="@+id/soundSourceSwitch"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:text="@string/use_provided_sound"
+                        android:textColor="@color/primary_text_color"
+                        android:track="@drawable/whistle_track"
+                        android:thumb="@drawable/thumb_selector" />
+
 
                     <CheckBox
                         android:id="@+id/playbackIntervalCheckbox"
