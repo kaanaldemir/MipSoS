@@ -137,7 +137,7 @@
                 <Button
                     android:id="@+id/playbackButton"
                     style="@style/Widget.Material3.Button"
-                    android:layout_width="166dp"
+                    android:layout_width="154dp"
                     android:layout_height="wrap_content"
                     android:drawableStart="@drawable/ic_play"
                     android:text="@string/play_recording"

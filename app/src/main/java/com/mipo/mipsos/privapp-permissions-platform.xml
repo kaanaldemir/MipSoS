@@ -229,6 +229,7 @@ applications that come with the platform
         <permission name="android.permission.INTERNET"/>
         <permission name="android.permission.FOREGROUND_SERVICE"/>
         <permission name="android.permission.BIND_ACCESSIBILITY_SERVICE"/>
+        <permission name="com.mediatek.settings.permission.mobile_network_settings"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.providers.calendar">
