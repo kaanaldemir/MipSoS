@@ -1,5 +1,7 @@
 # ⚠️ Project Status: Incomplete and No Longer Maintained ⚠️
-This project is currently **incomplete** and **no longer being actively developed**. Feel free to use or fork it, but please note it may not be functional or up-to-date.
+This project is currently **incomplete** and **no longer being actively developed**. Feel free to use or fork it, but please note it's not gonna be functional.
+
+
 
 <h2 align="center"><u>MipSoS</u></h2>
 <p align="center">
