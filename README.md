@@ -1,5 +1,5 @@
 # ⚠️ Project Status: Incomplete and No Longer Maintained ⚠️
-This project is currently **incomplete** and **no longer being actively developed**. Feel free to use or fork it, but please note it's not gonna be functional.
+This project is currently **incomplete** and **no longer being actively developed**. Feel free to use or fork it, but please note that it's not gonna be functional.
 
 
 
