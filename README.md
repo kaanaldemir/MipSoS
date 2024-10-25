@@ -1,4 +1,4 @@
-<h2 align="center"><u># ⚠️ Project Status: Incomplete and No Longer Maintained ⚠️</u></h2>
+<h2 align="center"><u>⚠️ Project Status: Incomplete and No Longer Maintained ⚠️</u></h2>
 <p align="center">
 This project is currently **incomplete** and **no longer being actively developed**. Feel free to use or fork it, but please note that it's not gonna be functional.
 
