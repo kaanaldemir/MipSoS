@@ -7,6 +7,10 @@ This project is currently incomplete and no longer being actively developed. Fee
 
 
 
+
+
+
+
 <h2 align="center"><u>MipSoS</u></h2>
 <p align="center">
   <img src="https://raw.githubusercontent.com/kaanaldemir/MipSoS/master/app/src/main/res/mipmap-xxxhdpi/ic_launcher_foreground.webp" alt="MipSoS"/>
